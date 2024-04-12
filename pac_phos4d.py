@@ -29,13 +29,8 @@ import configparser
 
 # RUTA DE ARCHIVOS A PROCESAR
 
-#filesPath = "E:\CONICET\"
-#filesPath = "E:\GoogleDrive\CONICET\PROYECTOS\JMM\light_analisys\export_pts4-mct_month-mct_100cmV.tsv"
-#ilesPath = "./export_pts4-mct_month-mct_100cmH.tsv"
 filesPath = './'
 cnf_path = './pac_phos4d_config.cfg'
-#cnf_path = 'pac-pho4d_config'
-#filesPath = os.getcwd()
 
 filesPathData = ''
 filesPathSaveCSV = './'
@@ -221,8 +216,6 @@ def get_cdi_index_pho4d(dfDatas):
     - CDI parameter calc
     Escala de valores de iluminancia: 0lx, 50lx, 100lx, 200lx, 300lx, 500lx, 750lx, 1000lx, 2000lx
 
-
-
     1 - Del dataset filtrar por zona 
     2 - Tomar los valores por hora y contar las veces que ocurre la condición según la escala de iluminancia predefinida ("Threshold" en planilla excel)
     3 - El valor calculado en el punto 2 se debe *100 y dividir por la cantidad de puntos de la zona analizada para cada hora por cada valor de la 
@@ -247,8 +240,10 @@ def get_cdi_index_pho4d(dfDatas):
 
     nHours = len(list(dfDatas.columns)) - 5
     nSensors = len(dfDatas.index)
-    print(f"LA CANTIDAD DE HORAS A ANALIZAR SON {nHours} ")
-    print(f"LA CANTIDAD DE sensores A ANALIZAR SON {nSensors} ")
+    print("---------------------------------")
+    print(f"HOURS: {nHours} ")
+    print(f"NUMBER OF SENSORS: {nSensors} ")
+    print("---------------------------------")
 
     cdiMenor50 = np.zeros(nHours, dtype=float)
     cdiMayor50 = np.zeros(nHours, dtype=float)
@@ -358,7 +353,7 @@ def get_cdi_index_pho4d(dfDatas):
             if cdiMayor2000Aux[hs] >= cdiSensorsPercent:
                 cdiValues[hs] = 2000
         except:
-            print("Couldn't find a match for the key:", hs)
+            print(f"Couldn't find a match for the key: {hs}")
     
 
     print(cdiValues)
@@ -682,7 +677,6 @@ try:
 
 except:
     print("Error on configuration file")
-    print(f"CDI setpoint value set in {cdiSetpoint} by default")
     exit(0)
 
 print(filesPathData)
@@ -798,6 +792,8 @@ month_start_stop = []
 hour_start_stop = []
 cdiFract = []            
 CDIes = []
+cdi12hs = []
+cdiCustom = []
 
 sCDI_0lx = []
 sCDI_50lx = []
