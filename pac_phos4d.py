@@ -357,6 +357,9 @@ def get_cdi_index_pho4d(dfDatas):
     
 
     print(cdiValues)
+    cdiMatrix = np.reshape(cdiValues, (12,12))
+    print(cdiMatrix)
+
     return cdiValues
 
 
@@ -525,7 +528,6 @@ def read_config_file(config_file_path):
         MS = Month Start
         ME = Month End
 
-
     '''
     config = configparser.ConfigParser()
     config = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
@@ -679,7 +681,7 @@ except:
     print("Error on configuration file")
     exit(0)
 
-print(filesPathData)
+print(f"Data file: {filesPathData}")
 
 dfDatas = pd.read_csv(filesPathData, sep='\t', header=2)
 
@@ -691,7 +693,7 @@ hoursQuantity = len(cabeceras)-5
 print(f"Hours to proccess: {hoursQuantity}")
 
 zones = dfDatas[cabeceras[0]].value_counts(sort=False).index
-zonesNumberSensors = dfDatas[cabeceras[0]].value_counts(sort=False).to_dict() # dict with zones as key and number of sensor as values
+zonesNumberOfSensors = dfDatas[cabeceras[0]].value_counts(sort=False).to_dict() # dict with zones as key and number of sensor as values
 
 print(f"The zones are:\n{zones}")
 
