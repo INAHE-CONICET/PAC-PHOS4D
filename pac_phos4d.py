@@ -240,7 +240,9 @@ def get_cdi_index_pho4d(dfDatas):
 
     nHours = len(list(dfDatas.columns)) - 5
     nSensors = len(dfDatas.index)
+
     print("---------------------------------")
+    #print(f"ZONE: {dfDatas["# zone"]}")
     print(f"HOURS: {nHours} ")
     print(f"NUMBER OF SENSORS: {nSensors} ")
     print("---------------------------------")
@@ -268,7 +270,7 @@ def get_cdi_index_pho4d(dfDatas):
     cdiValues = np.zeros(nHours,dtype=float)
     
     # DETERMIANR LA CANTIDAD DE SENSORES CORRESPONDIENTE AL PORCETAJE SELECCIONADO
-    cdiSensorsPercent = 100 * float(cdiSensorFraction)
+    cdiSensorsPercent = 100 * float(parameters["CDI_SENSOR_FRACTION"])
 
     print(f"\nCDI - Porcentaje de sensores considerados: {cdiSensorsPercent:.2f} %\n")
          
@@ -533,9 +535,17 @@ def read_config_file(config_file_path):
     config = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
     config.read(config_file_path)
 
-    #print(config.sections())
+    configValues = {
+        "DATA_FILE_PATH": "",
+        "CSV_SAVE_PATH": "",
+        "HOUR_START": "0",
+        "HOUR_END": "11",
+        "MONTH_START": "0",
+        "MONTH_END": "11",
+        "CDI_SENSOR_FRACTION": "0.5"
+    }
 
-    filesPathData = config['PATHS']['data_file_path']
+    '''filesPathData = config['PATHS']['data_file_path']
     filesPathSaveCSV = config['PATHS']['csv_save_path']
     
     hour_start = config['FILTER']['hour_start']
@@ -544,18 +554,19 @@ def read_config_file(config_file_path):
     #month_end = config['FILTER']['month_end']
 
     cdiSensorFraction = config['PARAMETERS']['cdiSensorFraction']
-    cdiSetpoint = config['PARAMETERS']['cdiSetpoint']
+    #cdiSetpoint = config['PARAMETERS']['cdiSetpoint']'''
 
-    configValues = {'hsStart': config['FILTER']['hour_start'],
-                    'hsEnd': config['FILTER']['hour_end'],
-                    'filePath': config['PATHS']['data_file_path'],
-                    'cdiSensorFraction': config['PARAMETERS']['cdiSensorFraction']}
+    configValues = {
+        "DATA_FILE_PATH": config['PATHS']['data_file_path'],
+        "CSV_SAVE_PATH": config['PATHS']['csv_save_path'],
+        "HOUR_START": config['FILTER']['hour_start'],
+        "HOUR_END": config['FILTER']['hour_end'],
+        "MONTH_START": config['FILTER']['month_start'],
+        "MONTH_END": config['FILTER']['month_end'],
+        "CDI_SENSOR_FRACTION": config['PARAMETERS']['cdiSensorFraction']
+    }      
 
-    
-    #print(filesPathData)
-    #print(configValues)
-
-    return filesPathData, hour_start, hour_end, cdiSensorFraction, cdiSetpoint, filesPathSaveCSV
+    return configValues
 
 
 def create_file(filesPath, dfData):
@@ -598,20 +609,20 @@ def create_file(filesPath, dfData):
         print("Problem with creation of file")
 
 
-def get_sCDi (index, dfData):
+def get_sCDI (dfData):
 
     normalizeValues = {}
 
     values = {
-        "0lx": 0,
-        "50lx": 0,
-        "100lx": 0,
-        "200lx": 0,
-        "300lx": 0,
-        "500lx": 0,
-        "750lx": 0,
+        "2000lx": 0,        
         "1000lx": 0,
-        "2000lx": 0
+        "750lx": 0,
+        "500lx": 0,
+        "300lx": 0,
+        "200lx": 0,
+        "100lx": 0,
+        "50lx": 0,
+        "0lx": 0
     }
 
     countsValues = dfData.value_counts("cdi", normalize=True, ascending=True)
@@ -664,45 +675,102 @@ def get_sCDi (index, dfData):
     else:
         values["2000lx"] = 0.0
 
-
-    #print(values)
-
     return values
 
+def get_cdi_from_sCDI(sCDI):    
+    ''' 
+    Obtiene la iluminancia para la cual se cumple el 50% de tiempo ese nivel
 
-''' - INICIO PROGRAMA PRINCIPAL - '''
+    Input 
+    sCDI values
+
+    Output
+    cdi
+
+    '''
+
+    cdi = "0lx"
+    p = 0.0
+    print(sCDI)
+
+
+    for k in sCDI:
+        p = sCDI[k] + p
+        if p >= 50.00:
+            cdi = k
+            break
+        else:
+            continue
+    
+    if cdi == '0lx':
+        cdiValue = 0
+    elif cdi == '50lx':
+        cdiValue = 50
+    elif cdi == '100lx':
+        cdiValue = 100
+    elif cdi == '200lx':
+        cdiValue = 200
+    elif cdi == '300lx':
+        cdiValue = 300
+    elif cdi == '500lx':
+        cdiValue = 500
+    elif cdi == '750lx':
+        cdiValue = 750
+    elif cdi == '1000lx':
+        cdiValue = 1000
+    elif cdi == '2000lx':
+        cdiValue = 2000    
+    
+    print(f"El valor de CDI es {cdiValue}")
+
+    return cdiValue
+
+
+''' - START - '''
 
 # Read config file
+parameters = {}
 try:
-    filesPathData, hour_start, hour_end, cdiSensorFraction, cdiSetpoint, filesPathSaveCSV = read_config_file(cnf_path)    
+    #filesPathData, hour_start, hour_end, cdiSensorFraction, filesPathSaveCSV = read_config_file(cnf_path)    
+    parameters = read_config_file(cnf_path)
+    print(f"Config parameters >>\n {parameters} \n")
     print("Config file OK")
 
 except:
     print("Error on configuration file")
     exit(0)
 
-print(f"Data file: {filesPathData}")
+print(f"Data file: {parameters["DATA_FILE_PATH"]}")
+#print(f"Data file: {parameters['FILES_PATH_DATA']}")
 
-dfDatas = pd.read_csv(filesPathData, sep='\t', header=2)
+try:
+    dfDatas = pd.read_csv(parameters["DATA_FILE_PATH"], sep='\t', header=2)
+    #dfDatas = pd.read_csv(parameters['FILES_PATH_DATA'], sep='\t', header=2)
+    print("Data file OK")
 
-cabeceras = list(dfDatas.columns)
-print(f"Headers of dataframe:\n{cabeceras}")
+except:
+    print("Error on Data file")
+    exit(0)
 
-hoursQuantity = len(cabeceras)-5
+headers = list(dfDatas.columns)
+#print(f"Headers of dataframe:\n{headers}")
+
+hoursQuantity = len(headers)-5
 
 print(f"Hours to proccess: {hoursQuantity}")
 
-zones = dfDatas[cabeceras[0]].value_counts(sort=False).index
-zonesNumberOfSensors = dfDatas[cabeceras[0]].value_counts(sort=False).to_dict() # dict with zones as key and number of sensor as values
+zones = dfDatas[headers[0]].value_counts(sort=False).index
+zonesNumberOfSensors = dfDatas[headers[0]].value_counts(sort=False).to_dict() # dict with zones as key and number of sensor as values
 
 print(f"The zones are:\n{zones}")
 
 tablaDatos = dict()
+
 print(dfDatas["# zone"].unique().tolist())
 
 cdiMatrix = pd.DataFrame()
 #cdiMatrix = pd.DataFrame(columns=["# zone", "cdi"])
-df_cdi = pd.DataFrame(columns = ['zones', 'cdi'], index=[0])
+df_cdi = pd.DataFrame(columns = ['zones', 'cdi'], index=[0]) ### NOT USED - review his use
 
 #df_mct_ = pd.DataFrame(columns=['zones', 'month', 'mct'], index=[0])
 #df_aux = pd.DataFrame(columns=['opacity'], index=[0])
@@ -712,9 +780,9 @@ cdi_data = {}
 df_global = {}
 
 for zone in zones:
-    df_mct[zone] = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct'], index=[0])
-    cdi_data[zone] = pd.DataFrame(columns=['cdi'], index=[0])
-    df_global[zone] = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct', 'cdi'], index=[0])
+    df_mct[zone] = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct'])#, index=[0])
+    cdi_data[zone] = pd.DataFrame(columns=['cdi'])#, index=[0])
+    df_global[zone] = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct', 'cdi'])#, index=[0])
 
 
 # The function get_cdi_pho4d() should return a pandas dataframe with zone and cdi columns
@@ -737,25 +805,22 @@ for indice in zones:
     #tablaDatos[indice] = pd.DataFrame(columnas)
    
 #print(tablaDatos)
-print(f'El tamanio de la tabla de datos es >> {getsizeof(tablaDatos)}')
+print(f'The size of DataTable is >> {getsizeof(tablaDatos)}')
 
 #df_mct = pd.DataFrame({'zones':[], 'month':[], 'hour':[], 'mct':[]})
 #df_mct = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct'], index=[0])
 #df_mct = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct'], index=[0])
-
-
-
-print(f"LOS DATOS DE df_mct SON \n {df_mct}")
+#print(f"LOS DATOS DE df_mct SON \n {df_mct}")
 
 #Create dataFrame with mct values for each 'Zone'
-for element in range (5,len(cabeceras)):
-    mct_values = dfDatas.groupby("# zone")[cabeceras[element]].median()
+for element in range (5,len(headers)):
+    mct_values = dfDatas.groupby("# zone")[headers[element]].median()
     #print(f"LOS VALORES MEDIOS SON \n {mct_values}")
-    hour = get_hour_from_header(cabeceras[element])
-    month = get_month_from_header(cabeceras[element])
+    hour = get_hour_from_header(headers[element])
+    month = get_month_from_header(headers[element])
 
-    hour_int = get_hour_from_header_int(cabeceras[element])
-    month_int = get_month_from_header_int(cabeceras[element])
+    hour_int = get_hour_from_header_int(headers[element])
+    month_int = get_month_from_header_int(headers[element])
     
     for indice in mct_values.index:        
         df_mct[indice] = pd.concat([df_mct[indice], pd.DataFrame({'zones': [indice], 'month':[month], 'hour': [hour], 'mct': [mct_values[indice]]})], ignore_index=True, axis=0)
@@ -813,14 +878,22 @@ print(zones)
 for indice in zones:
 
     print(df_global[indice])
-    sCDI_values = get_sCDi(indice, df_global[indice])
+    sCDI_values = get_sCDI(df_global[indice])
+
+    print(f"Los valores de sCDI son >> \n {sCDI_values}")
+
+    cdi12hsIndex = get_cdi_from_sCDI(sCDI_values)
+    #cdiCustomIndex = get_cdi_value(df_global[indice], hour_int, hour_end, month_int, month_end)
     
     indexID.append(indice)
 
     month_start_stop.append("January - December")
-    hour_start_stop.append(str(hour_start + "-" + hour_end))
-    cdiFract.append(cdiSensorFraction)            
+    hour_start_stop.append(str(parameters['HOUR_START'] + "-" + parameters['HOUR_END']))
+    cdiFract.append(parameters["CDI_SENSOR_FRACTION"])            
     CDIes.append(cdiSetpoint)
+
+    cdi12hs.append(cdi12hsIndex)
+    #cdiCustom.append(cdiCustomIndex)
 
     sCDI_0lx.append(sCDI_values['0lx'])
     sCDI_50lx.append(sCDI_values['50lx'])
@@ -832,7 +905,7 @@ for indice in zones:
     sCDI_1000lx.append(sCDI_values['1000lx'])
     sCDI_2000lx.append(sCDI_values['2000lx'])
 
-print("LOS VALRES DE DE sCDI SON:")
+print("LOS VALORES DE DE sCDI SON:")
 print (indexID)
 print (month_start_stop)
 print(hour_start_stop)
@@ -844,7 +917,7 @@ resultados = {
                 "month_start-month_end" : month_start_stop,
                 "hour_start-hour_end": hour_start_stop, 
                 "cdiSensorFraction": cdiFract,            
-                "CDI": CDIes,
+                "CDI": cdi12hs,
                 "sCDI-0lx": sCDI_0lx,
                 "sCDI-50lx": sCDI_50lx,
                 "sCDI-100lx": sCDI_100lx,
@@ -861,7 +934,7 @@ print(resultados)
 dfUnificados = pd.DataFrame(resultados)
 print (dfUnificados)
        
-create_file(filesPathSaveCSV, dfUnificados)
+create_file(parameters["CSV_SAVE_PATH"], dfUnificados)
 
 ###########################
 ### GRAPHICS SECTIONS   ###
@@ -940,8 +1013,8 @@ for z in range(0,len(zones)):
 
     
 
-predifined_hour_start = int(hour_start) + 0.5
-predifined_hour_stop = int(hour_end) + 1.5
+predifined_hour_start = int(parameters["HOUR_START"]) + 0.5
+predifined_hour_stop = int(parameters["HOUR_END"]) + 1.5
 
 #coord = [[x_lower, x_upper], [x_lower, x_upper]] primer elemento configura el rectangulo de la izquierda el segundo elemento configura el rectangulo de la derecha
 #coord = [[1, 4], [7, 13]]
