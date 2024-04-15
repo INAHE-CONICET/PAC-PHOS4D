@@ -566,6 +566,7 @@ def read_config_file(config_file_path):
         "CDI_SENSOR_FRACTION": config['PARAMETERS']['cdiSensorFraction']
     }      
 
+    print(f"Los valores de configuracion son \n {configValues}")
     return configValues
 
 
@@ -740,8 +741,9 @@ except:
     print("Error on configuration file")
     exit(0)
 
+'''print(parameters)
 print(f"Data file: {parameters["DATA_FILE_PATH"]}")
-#print(f"Data file: {parameters['FILES_PATH_DATA']}")
+#print(f"Data file: {parameters['FILES_PATH_DATA']}")'''
 
 try:
     dfDatas = pd.read_csv(parameters["DATA_FILE_PATH"], sep='\t', header=2)
@@ -911,7 +913,6 @@ print (month_start_stop)
 print(hour_start_stop)
 print (sCDI_values)
 
-
 resultados = {
                 "ID" : indexID, 
                 "month_start-month_end" : month_start_stop,
@@ -939,7 +940,6 @@ create_file(parameters["CSV_SAVE_PATH"], dfUnificados)
 ###########################
 ### GRAPHICS SECTIONS   ###
 ###########################
-
 
 fig = go.Figure()
 
@@ -1008,21 +1008,20 @@ for z in range(0,len(zones)):
                    }],
             label = zones[z]+" CDI metric",
             method = "restyle")
-     )
-    
-
-    
+     ) 
 
 predifined_hour_start = int(parameters["HOUR_START"]) + 0.5
 predifined_hour_stop = int(parameters["HOUR_END"]) + 1.5
+predifined_month_start = int(parameters["MONTH_START"]) + 0.5
+predifined_month_stop = int(parameters["MONTH_END"]) + 1.5
 
 #coord = [[x_lower, x_upper], [x_lower, x_upper]] primer elemento configura el rectangulo de la izquierda el segundo elemento configura el rectangulo de la derecha
 #coord = [[1, 4], [7, 13]]
 
-coord = [[1, 1], [13, 13]]
+coord = [[1, 1], [13, 13],[1, 1], [13, 13]]
 ply_shapes = {}
 opacity_value = 0.8
-for i in range(0,2):
+for i in range(0,4):
     ply_shapes['shape_'+str(i)] = go.layout.Shape(type="rect",
                                                   x0=coord[i][0] - 0.5,
                                                   x1=coord[i][1] - 0.5,
@@ -1037,6 +1036,43 @@ for i in range(0,2):
 
 
 buttons_shapes = [
+    dict(args=[{'shapes[0].visible': False,
+                'shapes[1].visible': False,
+                'shapes[2].visible': False,
+                'shapes[3].visible': False,                
+                }], 
+         label= 'No Filter', 
+         method='relayout'
+         ),
+    
+    dict(args=[{'shapes[0].visible': True,
+                'shapes[1].visible': True,
+                'shapes[2].visible': True,
+                'shapes[3].visible': True,
+
+                'shapes[0].x0': predifined_hour_stop, 
+                'shapes[0].x1': 12.5,
+                'shapes[1].x0': 0.5,
+                'shapes[1].x1': predifined_hour_start,
+
+                'shapes[2].x0': predifined_hour_start, 
+                'shapes[2].x1': predifined_hour_stop,
+                'shapes[2].y0': 0.5,
+                'shapes[2].y1': predifined_month_start,
+
+                'shapes[3].x0': predifined_hour_start,
+                'shapes[3].x1': predifined_hour_stop,
+                'shapes[3].y0': predifined_month_stop,
+                'shapes[3].y1': 12.5,
+
+
+                }], 
+         label= 'Predifined', 
+         method='relayout'
+         )]
+
+
+'''buttons_shapes = [
     dict(args=[{'shapes[0].visible': False,
                 'shapes[1].visible': False,                
                 }], 
@@ -1072,7 +1108,7 @@ buttons_shapes = [
          label= 'Afternoon', 
          method='relayout'
          )    
-]
+]'''
 
 lst_shapes=list(ply_shapes.values())
 fig.update_layout(shapes=lst_shapes)
