@@ -364,160 +364,6 @@ def get_cdi_index_pho4d(dfDatas):
 
     return cdiValues
 
-
-'''
-def get_cdi_index(dmcNsensors, dmcRealHours, dmcCondicion, dfResultados):
-    """"
-    - CALCULO DE PARÁMETRO CDI
-    Escala de valores de iluminancia: 0lx, 50lx, 100lx, 200lx, 300lx, 500lx, 750lx, 1000lx, 2000lx
-
-    Parámetros Input
-        dmcNsensors -  cantida de sensores 
-        dmcRealHours - cantidad de horas a considerar 
-        dmcCondicion - condición de ocupación, y horas a considerar
-        dfResultados - dataFrame con los valores de iluminancia de todos los sensores a analizar
-
-    Parámetros Output
-        cdiValues - dataframe, valor de máxima iluminancia por sensor, segun escala
-        sCDIvalues - porcentaje de sensores para cada rango de la escala indicada
-
-    """"
-    cdiMenor50 = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor50 = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor100 = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor200 = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor300 = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor500 = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor750 = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor1000 = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor2000 = np.zeros(dmcNsensors, dtype=float)
-
-    cdiMenor50Aux = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor50Aux = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor100Aux = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor200Aux = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor300Aux = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor500Aux = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor750Aux = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor1000Aux = np.zeros(dmcNsensors, dtype=float)
-    cdiMayor2000Aux = np.zeros(dmcNsensors, dtype=float)
-
-    cdiValues = np.zeros(dmcNsensors,dtype=float)
-    cdiValue = 0.0
-    sCDIvalues = { "0lx": 0, "50lx": 0, "100lx": 0, "200lx": 0, "300lx": 0, "500lx": 0, "750lx": 0, "1000lx": 0, "2000lx": 0 }
-    cdi = ""
-
-    # DETERMIANR LA CANTIDAD DE SENSORES CORRESPONDIENTE AL PORCETAJE SELECCIONADO
-    cdiSensorsPercent = 100 * cdiPorcentajeSensores
-    scdiSensorPercent = 100 * scdiPorcentajeSensores
-    print(f"\nCDI - Porcentaje de sensores considerados: {cdiSensorsPercent:.2f} %\n")
-    
-    dfCDIVector = dfResultados[[dfResultados.columns[0]]].copy() # permite generar un array con la misma cantida de filas que el dataFrame que recibimos
-    dfCDIVector[:] = 0    
-    
-    for sensor in range(dfResultados.shape[1]):
-        dfCDIVector.loc[((dfResultados[sensor] < 50) & (dmcCondicion['condicion'] == 1)), dfCDIVector.columns[0]] = 1
-        cdiMenor50[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()
-        dfCDIVector[:] = 0        
-
-        dfCDIVector.loc[(dfResultados[sensor] >= 50) & (dmcCondicion['condicion'] == 1), dfCDIVector.columns[0]] = 1
-        cdiMayor50[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()
-        dfCDIVector[:] = 0
-
-        dfCDIVector.loc[(dfResultados[sensor] >= 100) & (dmcCondicion['condicion'] == 1), dfCDIVector.columns[0]] = 1
-        cdiMayor100[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()
-        dfCDIVector[:] = 0
-
-        dfCDIVector.loc[(dfResultados[sensor] >= 200) & (dmcCondicion['condicion'] == 1), dfCDIVector.columns[0]] = 1
-        cdiMayor200[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()
-        dfCDIVector[:] = 0
-
-        dfCDIVector.loc[(dfResultados[sensor] >= 300) & (dmcCondicion['condicion'] == 1), dfCDIVector.columns[0]] = 1
-        cdiMayor300[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()
-        dfCDIVector[:] = 0
-
-        dfCDIVector.loc[(dfResultados[sensor] >= 500) & (dmcCondicion['condicion'] == 1), dfCDIVector.columns[0]] = 1
-        cdiMayor500[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()
-        dfCDIVector[:] = 0
-
-        dfCDIVector.loc[(dfResultados[sensor] >= 750) & (dmcCondicion['condicion'] == 1), dfCDIVector.columns[0]] = 1
-        cdiMayor750[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()
-        dfCDIVector[:] = 0
-
-        dfCDIVector.loc[(dfResultados[sensor] >= 1000) & (dmcCondicion['condicion'] == 1), dfCDIVector.columns[0]] = 1
-        cdiMayor1000[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()
-        dfCDIVector[:] = 0
-
-        dfCDIVector.loc[(dfResultados[sensor] >= 2000) & (dmcCondicion['condicion'] == 1), dfCDIVector.columns[0]] = 1
-        cdiMayor2000[sensor] = dfCDIVector[dfCDIVector.columns[0]].sum()     
-        dfCDIVector[:] = 0         
-
-        cdiMenor50Aux[sensor] = cdiMenor50[sensor] * 100 / dmcRealHours
-        cdiMayor50Aux[sensor] = cdiMayor50[sensor] * 100 / dmcRealHours
-        cdiMayor100Aux[sensor] = cdiMayor100[sensor] * 100 / dmcRealHours
-        cdiMayor200Aux[sensor] = cdiMayor200[sensor] * 100 / dmcRealHours
-        cdiMayor300Aux[sensor] = cdiMayor300[sensor] * 100 / dmcRealHours
-        cdiMayor500Aux[sensor] = cdiMayor500[sensor] * 100 / dmcRealHours
-        cdiMayor750Aux[sensor] = cdiMayor750[sensor] * 100 / dmcRealHours
-        cdiMayor1000Aux[sensor] = cdiMayor1000[sensor] * 100 / dmcRealHours
-        cdiMayor2000Aux[sensor] = cdiMayor2000[sensor] * 100 / dmcRealHours
-
-        if cdiMenor50Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 0
-        if cdiMayor50Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 50
-        if cdiMayor100Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 100
-        if cdiMayor200Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 200
-        if cdiMayor300Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 300
-        if cdiMayor500Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 500
-        if cdiMayor750Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 750
-        if cdiMayor1000Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 1000
-        if cdiMayor2000Aux[sensor] >= cdiSensorsPercent:
-            cdiValues[sensor] = 2000
-        
-        if int(cdiValues[sensor]) == 0:
-            sCDIvalues["0lx"] = sCDIvalues["0lx"] + 1
-        if int(cdiValues[sensor]) == 50:
-            sCDIvalues["50lx"] = sCDIvalues["50lx"] + 1
-        if int(cdiValues[sensor]) == 100:
-            sCDIvalues["100lx"] = sCDIvalues["100lx"] + 1
-        if int(cdiValues[sensor]) == 200:
-            sCDIvalues["200lx"] = sCDIvalues["200lx"] + 1
-        if int(cdiValues[sensor]) == 300:
-            sCDIvalues["300lx"] = sCDIvalues["300lx"] + 1
-        if int(cdiValues[sensor]) == 500:
-            sCDIvalues["500lx"] = sCDIvalues["500lx"] + 1
-        if int(cdiValues[sensor]) == 750:
-            sCDIvalues["750lx"] = sCDIvalues["750lx"] + 1
-        if int(cdiValues[sensor] )== 1000:
-            sCDIvalues["1000lx"] = sCDIvalues["1000lx"] + 1
-        if int(cdiValues[sensor]) == 2000:
-            sCDIvalues["2000lx"] = sCDIvalues["2000lx"] + 1
-    
-    
-    print(f"valores de sCDI: {sCDIvalues}")
-    for k in sCDIvalues:
-        sCDIvalues[k] = sCDIvalues[k]*100/dmcNsensors 
-    
-    for k in sCDIvalues:
-        cdiValue += sCDIvalues[k]
-        cdi = k
-        if (cdiValue >= cdiPorcentajeSensores*100):
-            break
-
-    print(f"Valores de sCDI normalizados: < 50lx: {sCDIvalues['0lx']:.2f} >= 50lx: {sCDIvalues['50lx']:.2f}, >= 100lx: {sCDIvalues['100lx']:.2f}, >= 200lx: {sCDIvalues['200lx']:.2f}, >= 300lx: {sCDIvalues['300lx']:.2f}, >= 500lx: {sCDIvalues['500lx']:.2f}, >= 750lx: {sCDIvalues['750lx']:.2f}, >= 1000lx: {sCDIvalues['1000lx']:.2f}, >= 2000lx: {sCDIvalues['2000lx']:.2f}\n")
-    
-    return cdiValues, sCDIvalues, cdi
-
-'''
-
-
 def read_config_file(config_file_path):
     '''
     Read the configuration file and set de variables 
@@ -569,7 +415,6 @@ def read_config_file(config_file_path):
     print(f"Los valores de configuracion son \n {configValues}")
     return configValues
 
-
 def create_file(filesPath, dfData):
     '''
     - GENERACIÓN DE ARCHIVOS CON LOS DATOS UNIFICADOS
@@ -609,7 +454,6 @@ def create_file(filesPath, dfData):
     except:
         print("Problem with creation of file")
 
-
 def get_sCDI (dfData):
 
     normalizeValues = {}
@@ -628,8 +472,6 @@ def get_sCDI (dfData):
 
     countsValues = dfData.value_counts("cdi", normalize=True, ascending=True)
     normalizeValues = countsValues.to_dict()
-
-    #print(normalizeValues)
 
     if 0.0 in normalizeValues:
         values["0lx"] = round(normalizeValues[0.0]*100, 2)
@@ -680,20 +522,19 @@ def get_sCDI (dfData):
 
 def get_cdi_from_sCDI(sCDI):    
     ''' 
-    Obtiene la iluminancia para la cual se cumple el 50% de tiempo ese nivel
+    Get CDI value from sCDI values
 
     Input 
-    sCDI values
+    sCDI values in dictionary format key:value >> 50lx:20.56
 
     Output
-    cdi
+    cdi value, Int format 
 
     '''
 
     cdi = "0lx"
     p = 0.0
     print(sCDI)
-
 
     for k in sCDI:
         p = sCDI[k] + p
@@ -741,10 +582,6 @@ except:
     print("Error on configuration file")
     exit(0)
 
-'''print(parameters)
-print(f"Data file: {parameters["DATA_FILE_PATH"]}")
-#print(f"Data file: {parameters['FILES_PATH_DATA']}")'''
-
 try:
     dfDatas = pd.read_csv(parameters["DATA_FILE_PATH"], sep='\t', header=2)
     #dfDatas = pd.read_csv(parameters['FILES_PATH_DATA'], sep='\t', header=2)
@@ -753,6 +590,13 @@ try:
 except:
     print("Error on Data file")
     exit(0)
+
+
+hour_start = int(parameters["HOUR_START"])
+hour_end = int(parameters["HOUR_END"])
+month_start = int(parameters["MONTH_START"])
+month_end = int(parameters["MONTH_END"])
+
 
 headers = list(dfDatas.columns)
 #print(f"Headers of dataframe:\n{headers}")
@@ -791,10 +635,6 @@ for zone in zones:
 for zone in dfDatas["# zone"].unique().tolist():
     cdies = get_cdi_index_pho4d(dfDatas.loc[(dfDatas["# zone"] == zone)])    
     print(f"Los datos de CDI son: \n{cdies}")
-    #data[zone] = {'cdi': cdies}
-    #data = {'zones': [str(zone) for i in range(0, len(cdies))], 'cdi': cdies}
-    #data_df = pd.DataFrame(data)
-    #df_cdi = pd.concat([df_cdi, data_df], ignore_index=True)
     for element in cdies:
         cdi_data[zone] = pd.concat([cdi_data[zone], pd.DataFrame({'cdi': [element]})], ignore_index=True, axis=0)
         
@@ -825,7 +665,7 @@ for element in range (5,len(headers)):
     month_int = get_month_from_header_int(headers[element])
     
     for indice in mct_values.index:        
-        df_mct[indice] = pd.concat([df_mct[indice], pd.DataFrame({'zones': [indice], 'month':[month], 'hour': [hour], 'mct': [mct_values[indice]]})], ignore_index=True, axis=0)
+        df_mct[indice] = pd.concat([df_mct[indice], pd.DataFrame({'zones': [indice], 'month':[month_int], 'hour': [hour_int], 'mct': [mct_values[indice]]})], ignore_index=True, axis=0)
         
         #df_aux2[indice] = pd.DataFrame({'zones': [indice], 'month':[month], 'hour': [hour], 'mct': [mct_values[indice]]})
         #df_aux2[indice] = pd.concat([df_aux2[indice], pd.DataFrame({'zones': [indice], 'month':[month], 'hour': [hour], 'mct': [mct_values[indice]]})], ignore_index=True, axis=0)
@@ -836,15 +676,15 @@ for element in range (5,len(headers)):
 ### JOIN THE VALUES OF CDI TO df_mct DATAFRAME
 #print(f"LOS DATOS DE df_mct \n {df_mct}")
 #df_to_plot = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct', 'cdi'], index=[0])
-for indice in zones:
-    df_global[indice] = pd.concat([df_mct[indice], cdi_data[indice]], axis=1)
+for zone in zones:
+    df_global[zone] = pd.concat([df_mct[zone], cdi_data[zone]], axis=1)
 
 df_to_plot = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct', 'cdi'])
 
-for indice in zones:
-    df_to_plot = pd.concat([df_to_plot, df_global[indice]], ignore_index=True, axis=0)
+for zone in zones:
+    df_to_plot = pd.concat([df_to_plot, df_global[zone]], ignore_index=True, axis=0)
 
-#xLabs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+
 xLabs = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]
 yLabs = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
@@ -874,29 +714,60 @@ sCDI_750lx = []
 sCDI_1000lx = []
 sCDI_2000lx = []
 
+custom_sCDI_0lx = []
+custom_sCDI_50lx = []
+custom_sCDI_100lx = []
+custom_sCDI_200lx = []
+custom_sCDI_300lx = []
+custom_sCDI_500lx = []
+custom_sCDI_750lx = []
+custom_sCDI_1000lx = []
+custom_sCDI_2000lx = []
+
 
 print(zones)
 
 for indice in zones:
 
     print(df_global[indice])
-    sCDI_values = get_sCDI(df_global[indice])
+    sCDI_values = get_sCDI(df_global[indice])#, mes_inicio. mes_fin, hora_inicio, hora_fin)
+
+    df_sCDI_aux = df_global[indice]
+
+    print(df_sCDI_aux)
+    df_sCDI_aux = df_sCDI_aux[((df_sCDI_aux["month"].values >= (month_start))&(df_sCDI_aux["month"].values <= month_end))&
+                ((df_sCDI_aux["hour"].values >= (hour_start))&(df_sCDI_aux["hour"].values <= hour_end))]
+
+    print(df_sCDI_aux)
+
+
+    sCDI_custom = get_sCDI(df_sCDI_aux)
 
     print(f"Los valores de sCDI son >> \n {sCDI_values}")
 
     cdi12hsIndex = get_cdi_from_sCDI(sCDI_values)
-    #cdiCustomIndex = get_cdi_value(df_global[indice], hour_int, hour_end, month_int, month_end)
+    cdiCustomIndex = get_cdi_from_sCDI(sCDI_custom)
     
     indexID.append(indice)
 
-    month_start_stop.append("January - December")
-    hour_start_stop.append(str(parameters['HOUR_START'] + "-" + parameters['HOUR_END']))
+    month_start_stop.append(str(month_start) + " - " + str(month_end))
+    hour_start_stop.append(str(hour_start) + " - " + str(hour_end))
     cdiFract.append(parameters["CDI_SENSOR_FRACTION"])            
     CDIes.append(cdiSetpoint)
 
-    cdi12hs.append(cdi12hsIndex)
-    #cdiCustom.append(cdiCustomIndex)
+    
+    cdiCustom.append(cdiCustomIndex)
+    custom_sCDI_0lx.append(sCDI_custom['0lx'])
+    custom_sCDI_50lx.append(sCDI_custom['50lx'])
+    custom_sCDI_100lx.append(sCDI_custom['100lx'])
+    custom_sCDI_200lx.append(sCDI_custom['200lx'])
+    custom_sCDI_300lx.append(sCDI_custom['300lx'])
+    custom_sCDI_500lx.append(sCDI_custom['500lx'])
+    custom_sCDI_750lx.append(sCDI_custom['750lx'])
+    custom_sCDI_1000lx.append(sCDI_custom['1000lx'])
+    custom_sCDI_2000lx.append(sCDI_custom['2000lx'])
 
+    cdi12hs.append(cdi12hsIndex)    
     sCDI_0lx.append(sCDI_values['0lx'])
     sCDI_50lx.append(sCDI_values['50lx'])
     sCDI_100lx.append(sCDI_values['100lx'])
@@ -907,17 +778,27 @@ for indice in zones:
     sCDI_1000lx.append(sCDI_values['1000lx'])
     sCDI_2000lx.append(sCDI_values['2000lx'])
 
-print("LOS VALORES DE DE sCDI SON:")
+print("LOS VALORES DE DE sCDI custom SON:")
 print (indexID)
 print (month_start_stop)
 print(hour_start_stop)
-print (sCDI_values)
+print (sCDI_custom)
 
 resultados = {
                 "ID" : indexID, 
-                "month_start-month_end" : month_start_stop,
-                "hour_start-hour_end": hour_start_stop, 
-                "cdiSensorFraction": cdiFract,            
+                "custom_month_start-end" : month_start_stop,
+                "custom_hour_start-end": hour_start_stop, 
+                "cdiSensorFraction": cdiFract,
+                "CDI-CUSTOM": cdiCustom,
+                "custom-sCDI-0lx": custom_sCDI_0lx,
+                "custom-sCDI-50lx": custom_sCDI_50lx,
+                "custom-sCDI-100lx": custom_sCDI_100lx,
+                "custom-sCDI-200lx": custom_sCDI_200lx,
+                "custom-sCDI-300lx": custom_sCDI_300lx,
+                "custom-sCDI-500lx": custom_sCDI_500lx,
+                "custom-sCDI-750lx": custom_sCDI_750lx,
+                "custom-sCDI-1000lx": custom_sCDI_1000lx,
+                "custom-sCDI-2000lx": custom_sCDI_2000lx,                           
                 "CDI": cdi12hs,
                 "sCDI-0lx": sCDI_0lx,
                 "sCDI-50lx": sCDI_50lx,
