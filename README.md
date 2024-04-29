@@ -1,7 +1,8 @@
 # PAC-MD ![Badge en Desarollo](https://img.shields.io/badge/VERSION-1.0%20-yellow) ![Badge en Desarollo](https://img.shields.io/badge/ESTADO-beta_estable%20-green) ![Badge en Desarollo](https://img.shields.io/badge/LICENCIA-mpl2.0%20-red) 
 
 
-_PAC-PHOS4D es una herramienta de post-procesamiento de archivos de salida de simulaciones por zona de luz natural para edificios reconstruidos de [phos4dtool](https://igit.architektur.tu-darmstadt.de/phos-4d/phos4dtools) . Las métricas dinámicas incorporadas a esta herramienta son: Iluminancia, CDI y sCDI._
+_PAC-PHOS4D es una herramienta de post-procesamiento de archivos de salida de simulaciones por zona de luz natural para edificios reconstruidos de [phos4dtool](https://igit.architektur.tu-darmstadt.de/phos-4d/phos4dtools) . Las métricas dinámicas incorporadas a esta herramienta son: Iluminancia promedio, CDI y sCDI._
+
 ### Requisitos
 
 ```
@@ -35,7 +36,7 @@ pip install --upgrade pip
 pip install matplotlib numpy pandas plotly configparser
 ```
 
-Clonar carpeta de 'pac_md' desde Github
+Clonar carpeta de 'pac_phos4d' desde Github
 
 ```
 git clone https://github.com/INAHE-CONICET/PAC-PHOS4D.git
@@ -69,7 +70,7 @@ Ingresar a la capeta descargada 'PAC-PHOS4D'
 cd ./PAC-PHOS4D/
 ```
 
-En el caso de usuario Windows defina las siguientes carpetas y comente (;) 'OS Mac o Linux' (linea 13-14) en el archivo 'pac_phos4d.cfg'
+En el caso de usuario Windows defina las siguientes carpetas y comente (;) 'OS Mac o Linux' (linea 13-14) en el archivo 'setup.cfg'
 
 ```
 4  [PATH]
