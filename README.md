@@ -90,7 +90,7 @@ En el caso de usuarios OS Mac o Linux, comente 'OS Windows' (8-9)
 Ejecutar el post-procesamiento
 
 ```
-python3 pac_md.py
+python3 pac_phos4d.py
 ```
 
 A los resultados se puede acceder desde:
