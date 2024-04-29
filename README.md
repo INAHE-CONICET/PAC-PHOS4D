@@ -1,4 +1,4 @@
-# PAC-MD ![Badge en Desarollo](https://img.shields.io/badge/VERSION-1.0%20-yellow) ![Badge en Desarollo](https://img.shields.io/badge/ESTADO-beta_estable%20-green) ![Badge en Desarollo](https://img.shields.io/badge/LICENCIA-mpl2.0%20-red) 
+# PAC-PHOS4D ![Badge en Desarollo](https://img.shields.io/badge/VERSION-1.0%20-yellow) ![Badge en Desarollo](https://img.shields.io/badge/ESTADO-beta_estable%20-green) ![Badge en Desarollo](https://img.shields.io/badge/LICENCIA-mpl2.0%20-red) 
 
 
 _PAC-PHOS4D es una herramienta de post-procesamiento de archivos de salida de simulaciones por zona de luz natural para edificios reconstruidos de [phos4dtool](https://igit.architektur.tu-darmstadt.de/phos-4d/phos4dtools) . Las métricas dinámicas incorporadas a esta herramienta son: Iluminancia promedio, CDI y sCDI._
