@@ -99,3 +99,13 @@ A los resultados se puede acceder desde:
 ```
 ./example/results_pho4dt.csv
 ```
+
+### Autores
+
+**Ing. Emanuel R. Schumacher**. Personal de Apoyo. Instituto de Ambiente, Hábitat y Energía (INAHE), CONICET, Mendoza, Argentina. Enlaces de interés: [CONICET](https://www.conicet.gov.ar/new_scp/detalle.php?id=57001&keywords=Emanuel%2BSchumacher&datos_academicos=yes)
+
+**Dr. Juan Manuel Monteoliva**. Investigador Asistente. Instituto de Ambiente, Hábitat y Energía (INAHE), CONICET, Mendoza, Argentina. Enlaces de interés: [CONICET](https://www.conicet.gov.ar/new_scp/detalle.php?id=33083&datos_academicos=yes) - [ResearchGate](https://www.researchgate.net/profile/Juan-Manuel-Monteoliva).
+
+### Financiamiento
+
+Esta investigación fue apoyada por el Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET, Argentina) - **PIBAA 2872021010-0031CO** y la Agencia Nacional de Investigaciones Científicas y Tecnológicas Promoción (ANPCyT, Argentina) - **PICT 2019-04356**. La fuente de financiación no participó en el diseño de este desarrollo; en la codificación, análisis e interpretación de datos; o decisión alguna. 
