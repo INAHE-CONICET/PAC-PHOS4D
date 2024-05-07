@@ -691,7 +691,6 @@ for element in range (5,len(headers)):
 
 
 ### JOIN THE VALUES OF CDI TO df_mct DATAFRAME
-#print(f"LOS DATOS DE df_mct \n {df_mct}")
 #df_to_plot = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct', 'cdi'], index=[0])
 for zone in zones:
     df_global[zone] = pd.concat([df_mct[zone], cdi_data[zone]], axis=1)
@@ -701,13 +700,8 @@ df_to_plot = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct', 'cdi'])
 for zone in zones:
     df_to_plot = pd.concat([df_to_plot, df_global[zone]], ignore_index=True, axis=0)
 
-
 xLabs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
 yLabs = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
-
-#print(f'LOS DATOS DE LA ZONA {zones[0]} es >> \n{tablaDatos[zones[0]]}')
-#tabla_test = tablaDatos[zones[0]]
 
 print(":::::::::    LOS DATOS A GUARDAR SON :::::::::")
 print(df_to_plot)
@@ -1208,8 +1202,6 @@ fig.update_xaxes(
     title='HOURS',
     type="linear"                
     )
-
-
 
 fig.show()
 
