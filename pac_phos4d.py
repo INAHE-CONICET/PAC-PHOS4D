@@ -30,7 +30,7 @@ import configparser
 # RUTA DE ARCHIVOS A PROCESAR
 
 filesPath = './'
-cnf_path = './pac_phos4d_config.cfg'
+cnf_path = './setup.cfg'
 
 filesPathData = ''
 filesPathSaveCSV = './'
@@ -598,6 +598,23 @@ month_start = int(parameters["MONTH_START"])
 month_end = int(parameters["MONTH_END"])
 
 
+try:
+    #verify the hours range is correct
+    if (1 <= hour_start <= 12 and 1 <= hour_end <= 12 and hour_start < hour_end):
+        print("Values of Start and End Hour are valid")
+except:
+    print("The values of Start or End Hour are incorrect, please verify \n Hours must have a value between 1 and 12 \n Star Hour must be lower than End Hour")
+    exit(0)
+
+try:
+    #verify the month range is correct
+    if (1 <= month_start <= 12 and 1 <= month_end <= 12 ):
+        print("Values of Start and End Month are valid")
+except:
+    print("The values of Start or End Month are incorrect, please verify \n Months must have a value between 1 and 12")
+    exit(0)
+
+
 headers = list(dfDatas.columns)
 #print(f"Headers of dataframe:\n{headers}")
 
@@ -685,7 +702,7 @@ for zone in zones:
     df_to_plot = pd.concat([df_to_plot, df_global[zone]], ignore_index=True, axis=0)
 
 
-xLabs = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]
+xLabs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
 yLabs = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 
@@ -731,19 +748,42 @@ for indice in zones:
 
     print(df_global[indice])
     sCDI_values = get_sCDI(df_global[indice])#, mes_inicio. mes_fin, hora_inicio, hora_fin)
+    
+    
+    #print(df_sCDI_aux)
 
-    df_sCDI_aux = df_global[indice]
+    if (month_start < month_end):       
+        df_sCDI_aux = df_global[indice]
 
-    print(df_sCDI_aux)
-    df_sCDI_aux = df_sCDI_aux[((df_sCDI_aux["month"].values >= (month_start))&(df_sCDI_aux["month"].values <= month_end))&
-                ((df_sCDI_aux["hour"].values >= (hour_start))&(df_sCDI_aux["hour"].values <= hour_end))]
+        df_sCDI_aux = df_sCDI_aux[((df_sCDI_aux["month"].values >= (month_start-1))&(df_sCDI_aux["month"].values <= (month_end-1)))&
+                    ((df_sCDI_aux["hour"].values >= (hour_start-1))&(df_sCDI_aux["hour"].values <= (hour_end-1)))]
+        
+    elif (month_start > month_end):
 
+        lower = df_global[indice]
+        upper = df_global[indice]
+
+        #df_sCDI_aux = df_sCDI_aux[((df_sCDI_aux["month"].values <= (month_end-1))&(df_sCDI_aux["month"].values >= (month_start-1)))&
+        #            ((df_sCDI_aux["hour"].values >= (hour_start-1))&(df_sCDI_aux["hour"].values <= (hour_end-1)))]
+        
+        lower = lower[((lower["month"].values <= (month_end-1)))&
+                    ((lower["hour"].values >= (hour_start-1))&(lower["hour"].values <= (hour_end-1)))]
+        
+        upper = upper[((upper["month"].values >= (month_start-1)))&
+                    ((upper["hour"].values >= (hour_start-1))&(upper["hour"].values <= (hour_end-1)))]
+        
+        frames = [lower, upper]
+        
+        df_sCDI_aux = pd.concat(frames)
+            
+        
     print(df_sCDI_aux)
 
 
     sCDI_custom = get_sCDI(df_sCDI_aux)
 
     print(f"Los valores de sCDI son >> \n {sCDI_values}")
+    print(f"Los valores de sCDI - custom son >> \n {sCDI_custom}")
 
     cdi12hsIndex = get_cdi_from_sCDI(sCDI_values)
     cdiCustomIndex = get_cdi_from_sCDI(sCDI_custom)
@@ -891,10 +931,10 @@ for z in range(0,len(zones)):
             method = "restyle")
      ) 
 
-predifined_hour_start = int(parameters["HOUR_START"]) + 0.5
-predifined_hour_stop = int(parameters["HOUR_END"]) + 1.5
-predifined_month_start = int(parameters["MONTH_START"]) + 0.5
-predifined_month_stop = int(parameters["MONTH_END"]) + 1.5
+predifined_hour_start = int(parameters["HOUR_START"]) + 0.5 - 1
+predifined_hour_stop = int(parameters["HOUR_END"]) + 1.5 - 1
+predifined_month_start = int(parameters["MONTH_START"]) + 0.5 - 1
+predifined_month_stop = int(parameters["MONTH_END"]) + 1.5 - 1
 
 #coord = [[x_lower, x_upper], [x_lower, x_upper]] primer elemento configura el rectangulo de la izquierda el segundo elemento configura el rectangulo de la derecha
 #coord = [[1, 4], [7, 13]]
@@ -904,10 +944,14 @@ ply_shapes = {}
 opacity_value = 0.8
 for i in range(0,4):
     ply_shapes['shape_'+str(i)] = go.layout.Shape(type="rect",
-                                                  x0=coord[i][0] - 0.5,
-                                                  x1=coord[i][1] - 0.5,
-                                                  y0=0.5,
-                                                  y1=12.5,
+                                                  #x0=coord[i][0] - 0.5,
+                                                  #x1=coord[i][1] - 0.5,
+                                                  #y0=coord[i][0] - 0.5,
+                                                  #y1=coord[i][0] - 0.5,
+                                                  x0= 0.5,
+                                                  x1= 0.5,
+                                                  y0= 0.5,
+                                                  y1= 0.5,
                                                   line=dict(
                                                     color="gray",
                                                     width=2,
@@ -915,42 +959,80 @@ for i in range(0,4):
                                                   fillcolor="gray",
                                                   opacity=opacity_value)
 
+if (month_start > month_end):
+    buttons_shapes = [
+        dict(args=[{'shapes[0].visible': False,
+                    'shapes[1].visible': False,
+                    'shapes[2].visible': False,
+                    'shapes[3].visible': False,                
+                    }], 
+            label= 'No Filter', 
+            method='relayout'
+            ),
+        
+        dict(args=[{'shapes[0].visible': True,
+                    'shapes[1].visible': True,
+                    'shapes[2].visible': False,
+                    'shapes[3].visible': True,
 
-buttons_shapes = [
-    dict(args=[{'shapes[0].visible': False,
-                'shapes[1].visible': False,
-                'shapes[2].visible': False,
-                'shapes[3].visible': False,                
-                }], 
-         label= 'No Filter', 
-         method='relayout'
-         ),
+                    'shapes[0].x0': predifined_hour_stop, 
+                    'shapes[0].x1': 12.5,
+                    'shapes[0].y0': 0.5,
+                    'shapes[0].y1': 12.5,
+
+                    'shapes[1].x0': 0.5,
+                    'shapes[1].x1': predifined_hour_start,
+                    'shapes[1].y0': 0.5,
+                    'shapes[1].y1': 12.5,
+
+                    'shapes[3].x0': predifined_hour_start,
+                    'shapes[3].x1': predifined_hour_stop,
+                    'shapes[3].y0': predifined_month_stop,
+                    'shapes[3].y1': predifined_month_start,
+                    }], 
+            label= 'Predifined', 
+            method='relayout'
+            )]
+else:
+    buttons_shapes = [
+        dict(args=[{'shapes[0].visible': False,
+                    'shapes[1].visible': False,
+                    'shapes[2].visible': False,
+                    'shapes[3].visible': False,                
+                    }], 
+            label= 'No Filter', 
+            method='relayout'
+            ),
+        
+        dict(args=[{'shapes[0].visible': True,
+                    'shapes[1].visible': True,
+                    'shapes[2].visible': True,
+                    'shapes[3].visible': True,
+
+                    'shapes[0].x0': predifined_hour_stop, 
+                    'shapes[0].x1': 12.5,
+                    'shapes[0].y0': 0.5,
+                    'shapes[0].y1': 12.5,
+
+                    'shapes[1].x0': 0.5,
+                    'shapes[1].x1': predifined_hour_start,
+                    'shapes[1].y0': 0.5,
+                    'shapes[1].y1': 12.5,             
+
+                    'shapes[2].x0': predifined_hour_start, 
+                    'shapes[2].x1': predifined_hour_stop,
+                    'shapes[2].y0': 0.5,
+                    'shapes[2].y1': predifined_month_start,
+
+                    'shapes[3].x0': predifined_hour_start,
+                    'shapes[3].x1': predifined_hour_stop,
+                    'shapes[3].y0': predifined_month_stop,
+                    'shapes[3].y1': 12.5,
+                    }], 
+            label= 'Predifined', 
+            method='relayout'
+            )]
     
-    dict(args=[{'shapes[0].visible': True,
-                'shapes[1].visible': True,
-                'shapes[2].visible': True,
-                'shapes[3].visible': True,
-
-                'shapes[0].x0': predifined_hour_stop, 
-                'shapes[0].x1': 12.5,
-                'shapes[1].x0': 0.5,
-                'shapes[1].x1': predifined_hour_start,
-
-                'shapes[2].x0': predifined_hour_start, 
-                'shapes[2].x1': predifined_hour_stop,
-                'shapes[2].y0': 0.5,
-                'shapes[2].y1': predifined_month_start,
-
-                'shapes[3].x0': predifined_hour_start,
-                'shapes[3].x1': predifined_hour_stop,
-                'shapes[3].y0': predifined_month_stop,
-                'shapes[3].y1': 12.5,
-
-
-                }], 
-         label= 'Predifined', 
-         method='relayout'
-         )]
 
 
 '''buttons_shapes = [
