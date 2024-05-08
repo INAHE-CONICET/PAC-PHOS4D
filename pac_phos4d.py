@@ -3,8 +3,9 @@
 TEST DE LIBRERIAS kUFFLINGS Y PLOTLY
 
 Autores: 
-    Ing. Emanuel R. Schumacher
     PhD. Juan Manuel Monteoliva
+    Ing. Emanuel R. Schumacher
+    
     
 Fecha inicio: -
 
@@ -598,19 +599,19 @@ month_start = int(parameters["MONTH_START"])
 month_end = int(parameters["MONTH_END"])
 
 
-try:
+
     #verify the hours range is correct
-    if (1 <= hour_start <= 12 and 1 <= hour_end <= 12 and hour_start < hour_end):
+if ((1 <= hour_start <= 12) and (1 <= hour_end <= 12) and ( hour_start < hour_end)):
         print("Values of Start and End Hour are valid")
-except:
+else:
     print("The values of Start or End Hour are incorrect, please verify \n Hours must have a value between 1 and 12 \n Star Hour must be lower than End Hour")
     exit(0)
 
-try:
+
     #verify the month range is correct
-    if (1 <= month_start <= 12 and 1 <= month_end <= 12 ):
+if (1 <= month_start <= 12 and 1 <= month_end <= 12 ):
         print("Values of Start and End Month are valid")
-except:
+else:
     print("The values of Start or End Month are incorrect, please verify \n Months must have a value between 1 and 12")
     exit(0)
 
