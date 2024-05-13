@@ -600,8 +600,8 @@ month_end = int(parameters["MONTH_END"])
 
 
 
-    #verify the hours range is correct
-if ((1 <= hour_start <= 12) and (1 <= hour_end <= 12) and ( hour_start < hour_end)):
+    #verify the hours range is correct and ( hour_start < hour_end))
+if ((1 <= hour_start <= 12) and (1 <= hour_end <= 12)):
         print("Values of Start and End Hour are valid")
 else:
     print("The values of Start or End Hour are incorrect, please verify \n Hours must have a value between 1 and 12 \n Star Hour must be lower than End Hour")
@@ -742,38 +742,47 @@ print(zones)
 for indice in zones:
 
     print(df_global[indice])
-    sCDI_values = get_sCDI(df_global[indice])#, mes_inicio. mes_fin, hora_inicio, hora_fin)
-    
+    sCDI_values = get_sCDI(df_global[indice])#, mes_inicio. mes_fin, hora_inicio, hora_fin)    
     
     #print(df_sCDI_aux)
 
-    if (month_start < month_end):       
-        df_sCDI_aux = df_global[indice]
+    print(f"::::::::::::::::::::::::::::::::::::::::::::::::")
+    print(f"::::::::    FILTRADO POR HORA DE DATOS  ::::::::")
+    print(f"::::::::::::::::::::::::::::::::::::::::::::::::")
+    df_hs_aux = df_global[indice]
 
-        df_sCDI_aux = df_sCDI_aux[((df_sCDI_aux["month"].values >= (month_start-1))&(df_sCDI_aux["month"].values <= (month_end-1)))&
-                    ((df_sCDI_aux["hour"].values >= (hour_start-1))&(df_sCDI_aux["hour"].values <= (hour_end-1)))]
-        
-    elif (month_start > month_end):
+    if (hour_start > hour_end):        
+        df_hs_lower = df_hs_aux[(df_hs_aux["hour"].values <= (hour_end-1))]
+        df_hs_upper = df_hs_aux[(df_hs_aux["hour"].values >= (hour_start-1))]
+        framesHS = [df_hs_lower, df_hs_upper]            
+        df_hours = pd.concat(framesHS)
 
-        lower = df_global[indice]
-        upper = df_global[indice]
+    elif(hour_start < hour_end):
+        df_hours = df_hs_aux[(df_hs_aux["hour"].values >= (hour_start-1)) & (df_hs_aux["hour"].values <= (hour_end-1))]
 
-        #df_sCDI_aux = df_sCDI_aux[((df_sCDI_aux["month"].values <= (month_end-1))&(df_sCDI_aux["month"].values >= (month_start-1)))&
-        #            ((df_sCDI_aux["hour"].values >= (hour_start-1))&(df_sCDI_aux["hour"].values <= (hour_end-1)))]
+    else:
+        df_hours = df_hs_aux[(df_hs_aux["hour"].values == (hour_start-1))]
+    
+    print(df_hours)
+
+    print(f"::::::::::::::::::::::::::::::::::::::::::::::::")
+    print(f"::::::::::::::::::::::::::::::::::::::::::::::::")
+
+
+    if (month_start < month_end):
+        df_sCDI_aux = df_hours[((df_hours["month"].values >= (month_start-1))&(df_hours["month"].values <= (month_end-1)))]
         
-        lower = lower[((lower["month"].values <= (month_end-1)))&
-                    ((lower["hour"].values >= (hour_start-1))&(lower["hour"].values <= (hour_end-1)))]
-        
-        upper = upper[((upper["month"].values >= (month_start-1)))&
-                    ((upper["hour"].values >= (hour_start-1))&(upper["hour"].values <= (hour_end-1)))]
-        
-        frames = [lower, upper]
-        
+    elif (month_start > month_end):        
+        df_month_lower = df_hours[((df_hours["month"].values <= (month_end-1)))]        
+        df_month_upper = df_hours[((df_hours["month"].values >= (month_start-1)))]        
+        frames = [df_month_lower, df_month_upper]        
         df_sCDI_aux = pd.concat(frames)
+
+    else:
+        df_sCDI_aux = df_hours[df_hours["month"].values == (month_start-1)]
             
         
     print(df_sCDI_aux)
-
 
     sCDI_custom = get_sCDI(df_sCDI_aux)
 
@@ -881,28 +890,6 @@ fig = go.Figure(go.Heatmap(
         
     ))
 
-
-'''
-#for zones in list(df_mct["zones"].unique()):
-
-### Create data selector for diferent Metrics ###
-metrics = ["mct", "cdi"]
-buttons_metrics = []
-metric = "mct"
-# create metric dropdown menu
-
-for m in range(0,len(metrics)):
-    buttons_metrics.append(
-        dict(
-            args=[{metric: metrics[m],
-                   "text":metrics[m],
-                   "name":metrics[m]
-                   }],
-            label = metrics[m],
-            method = "update")
-     )
-
-'''
 ### Create data selector for diferent Zones ###
 # create zones dropdown menu
 buttons_zones = []
@@ -955,78 +942,148 @@ for i in range(0,4):
                                                   opacity=opacity_value)
 
 if (month_start > month_end):
-    buttons_shapes = [
-        dict(args=[{'shapes[0].visible': False,
-                    'shapes[1].visible': False,
-                    'shapes[2].visible': False,
-                    'shapes[3].visible': False,                
-                    }], 
-            label= 'No Filter', 
-            method='relayout'
-            ),
-        
-        dict(args=[{'shapes[0].visible': True,
-                    'shapes[1].visible': True,
-                    'shapes[2].visible': False,
-                    'shapes[3].visible': True,
+    if(hour_start > hour_end):
+        buttons_shapes = [
+            dict(args=[{'shapes[0].visible': False,
+                        'shapes[1].visible': False,
+                        'shapes[2].visible': False,
+                        'shapes[3].visible': False,                
+                        }], 
+                label= 'No Filter', 
+                method='relayout'
+                ),
+            
+            dict(args=[{'shapes[0].visible': True,
+                        'shapes[1].visible': True,
+                        'shapes[2].visible': True,
+                        'shapes[3].visible': False,
 
-                    'shapes[0].x0': predifined_hour_stop, 
-                    'shapes[0].x1': 12.5,
-                    'shapes[0].y0': 0.5,
-                    'shapes[0].y1': 12.5,
+                        'shapes[0].x0': 0.5, 
+                        'shapes[0].x1': predifined_hour_stop,
+                        'shapes[0].y0': predifined_month_stop,
+                        'shapes[0].y1': predifined_month_start,
 
-                    'shapes[1].x0': 0.5,
-                    'shapes[1].x1': predifined_hour_start,
-                    'shapes[1].y0': 0.5,
-                    'shapes[1].y1': 12.5,
+                        'shapes[1].x0': predifined_hour_start,
+                        'shapes[1].x1': 12.5,
+                        'shapes[1].y0': predifined_month_stop,
+                        'shapes[1].y1': predifined_month_start,
 
-                    'shapes[3].x0': predifined_hour_start,
-                    'shapes[3].x1': predifined_hour_stop,
-                    'shapes[3].y0': predifined_month_stop,
-                    'shapes[3].y1': predifined_month_start,
-                    }], 
-            label= 'Predifined', 
-            method='relayout'
-            )]
+                        'shapes[2].x0': predifined_hour_stop,
+                        'shapes[2].x1': predifined_hour_start,
+                        'shapes[2].y0': 0.5,
+                        'shapes[2].y1': 12.5,
+                        }], 
+                label= 'Predifined', 
+                method='relayout'
+                )]
+    else:        
+        buttons_shapes = [
+            dict(args=[{'shapes[0].visible': False,
+                        'shapes[1].visible': False,
+                        'shapes[2].visible': False,
+                        'shapes[3].visible': False,                
+                        }], 
+                label= 'No Filter', 
+                method='relayout'
+                ),
+            
+            dict(args=[{'shapes[0].visible': True,
+                        'shapes[1].visible': True,
+                        'shapes[2].visible': True,
+                        'shapes[3].visible': False,
+
+                        'shapes[0].x0': 0.5, 
+                        'shapes[0].x1': predifined_hour_start,
+                        'shapes[0].y0': 0.5,
+                        'shapes[0].y1': 12.5,
+
+                        'shapes[1].x0': predifined_hour_stop,
+                        'shapes[1].x1': 12.5,
+                        'shapes[1].y0': 0.5,
+                        'shapes[1].y1': 12.5,
+
+                        'shapes[2].x0': predifined_hour_start,
+                        'shapes[2].x1': predifined_hour_stop,
+                        'shapes[2].y0': predifined_month_stop,
+                        'shapes[2].y1': predifined_month_start,
+                        }], 
+                label= 'Predifined', 
+                method='relayout'
+                )]
 else:
-    buttons_shapes = [
-        dict(args=[{'shapes[0].visible': False,
-                    'shapes[1].visible': False,
-                    'shapes[2].visible': False,
-                    'shapes[3].visible': False,                
-                    }], 
-            label= 'No Filter', 
-            method='relayout'
-            ),
-        
-        dict(args=[{'shapes[0].visible': True,
-                    'shapes[1].visible': True,
-                    'shapes[2].visible': True,
-                    'shapes[3].visible': True,
+    if(hour_start > hour_end):
+        buttons_shapes = [
+            dict(args=[{'shapes[0].visible': False,
+                        'shapes[1].visible': False,
+                        'shapes[2].visible': False,
+                        'shapes[3].visible': False,                
+                        }], 
+                label= 'No Filter', 
+                method='relayout'
+                ),
+            
+            dict(args=[{'shapes[0].visible': True,
+                        'shapes[1].visible': True,
+                        'shapes[2].visible': True,
+                        'shapes[3].visible': False,
 
-                    'shapes[0].x0': predifined_hour_stop, 
-                    'shapes[0].x1': 12.5,
-                    'shapes[0].y0': 0.5,
-                    'shapes[0].y1': 12.5,
+                        'shapes[0].x0': 0.5, 
+                        'shapes[0].x1': 12.5,
+                        'shapes[0].y0': 0.5,
+                        'shapes[0].y1': predifined_month_start,
 
-                    'shapes[1].x0': 0.5,
-                    'shapes[1].x1': predifined_hour_start,
-                    'shapes[1].y0': 0.5,
-                    'shapes[1].y1': 12.5,             
+                        'shapes[1].x0': 0.5,
+                        'shapes[1].x1': 12.5,
+                        'shapes[1].y0': predifined_month_stop,
+                        'shapes[1].y1': 12.5,             
 
-                    'shapes[2].x0': predifined_hour_start, 
-                    'shapes[2].x1': predifined_hour_stop,
-                    'shapes[2].y0': 0.5,
-                    'shapes[2].y1': predifined_month_start,
+                        'shapes[2].x0': predifined_hour_start, 
+                        'shapes[2].x1': predifined_hour_stop,
+                        'shapes[2].y0': predifined_month_start,
+                        'shapes[2].y1': predifined_month_stop,
+                        }], 
+                label= 'Predifined', 
+                method='relayout'
+                )]
+    else:
+        buttons_shapes = [
+            dict(args=[{'shapes[0].visible': False,
+                        'shapes[1].visible': False,
+                        'shapes[2].visible': False,
+                        'shapes[3].visible': False,                
+                        }], 
+                label= 'No Filter', 
+                method='relayout'
+                ),
+            
+            dict(args=[{'shapes[0].visible': True,
+                        'shapes[1].visible': True,
+                        'shapes[2].visible': True,
+                        'shapes[3].visible': True,
 
-                    'shapes[3].x0': predifined_hour_start,
-                    'shapes[3].x1': predifined_hour_stop,
-                    'shapes[3].y0': predifined_month_stop,
-                    'shapes[3].y1': 12.5,
-                    }], 
-            label= 'Predifined', 
-            method='relayout'
-            )]
+                        'shapes[0].x0': 0.5, 
+                        'shapes[0].x1': predifined_hour_start,
+                        'shapes[0].y0': 0.5,
+                        'shapes[0].y1': 12.5,
+
+                        'shapes[1].x0': predifined_hour_stop,
+                        'shapes[1].x1': 12.5,
+                        'shapes[1].y0': 0.5,
+                        'shapes[1].y1': 12.5,             
+
+                        'shapes[2].x0': predifined_hour_start, 
+                        'shapes[2].x1': predifined_hour_stop,
+                        'shapes[2].y0': 0.5,
+                        'shapes[2].y1': predifined_month_start,
+
+                        'shapes[3].x0': predifined_hour_start,
+                        'shapes[3].x1': predifined_hour_stop,
+                        'shapes[3].y0': predifined_month_stop,
+                        'shapes[3].y1': 12.5,
+                        }], 
+                label= 'Predifined', 
+                method='relayout'
+                )]
     
 
 
