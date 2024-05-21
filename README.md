@@ -47,6 +47,7 @@ o descomprimir el archivo ZIP descargado en la carpeta donde se instaló 'pac_ph
 ---
 
 Para instalar Visual Studio Code, dirijase al siguiente link (https://code.visualstudio.com/Download)
+
 Se recomienda para la correcta visualización de las gráficas y exportación usar como explorador predeterminado 'Gloogle Chrome'. En el caso de usuarios 'OS Mac' revisar la siguiente documentación oficial (https://support.apple.com/es-es/102362#:~:text=Haz%20clic%20en%20Escritorio%20y,“Navegador%20web%20por%20omisión”).
 
 ---
