@@ -449,7 +449,7 @@ def create_file(filesPath, dfData):
         return 0'''
     
     try:
-        dfData.to_csv(path+'results_pho4dt.csv', index = False ,mode='a')
+        dfData.to_csv(path+'results_pac.csv', index = False ,mode='a')
         print(f"Creation of file OK on {path}")
 
     except:
@@ -736,13 +736,18 @@ custom_sCDI_750lx = []
 custom_sCDI_1000lx = []
 custom_sCDI_2000lx = []
 
+ilum_anual_mean = []
+ilum_custom_mean = []
+
+sCDI_to_plot = pd.DataFrame(columns=['zones', 'sCDI', 'sCDI_custom'])
+sCDI_custom_to_plot = pd.DataFrame()
 
 print(zones)
 
 for indice in zones:
 
     print(df_global[indice])
-    sCDI_values = get_sCDI(df_global[indice])#, mes_inicio. mes_fin, hora_inicio, hora_fin)    
+    sCDI_values = get_sCDI(df_global[indice])   
     
     #print(df_sCDI_aux)
 
@@ -822,18 +827,40 @@ for indice in zones:
     sCDI_1000lx.append(sCDI_values['1000lx'])
     sCDI_2000lx.append(sCDI_values['2000lx'])
 
-print("LOS VALORES DE DE sCDI custom SON:")
+
+    ilum_anual_mean.append(df_hs_aux["mct"].mean())
+    ilum_custom_mean.append(df_sCDI_aux["mct"].mean())
+
+    print(ilum_anual_mean)
+    print(ilum_custom_mean)
+
+    dicc = {key: value for key, value in sCDI_values.items() if value > 0.00}
+    dicc_custom = {key: value for key, value in sCDI_custom.items() if value > 0.00}
+    print(f"LOS VALORES DE dicc SON {dicc}")
+    print(f"LOS VALORES DE dicc_custom SON {dicc_custom}")
+    
+
+    sCDI_to_plot = pd.DataFrame.append(sCDI_to_plot, {'zones': indice, 'sCDI': dicc, 'sCDI_custom': dicc_custom}, ignore_index=True)
+
+
+print("LOS VALORES DE sCDI A PLOTEAR SON")
+print(sCDI_to_plot)
+
+print(" sCDI CUSTOM VALUES ARE:")
 print (indexID)
 print (month_start_stop)
 print(hour_start_stop)
 print (sCDI_custom)
 
+
+
 resultados = {
-                "ID" : indexID, 
+                "zone" : indexID, 
                 "custom_month_start-end" : month_start_stop,
                 "custom_hour_start-end": hour_start_stop, 
                 "cdiSensorFraction": cdiFract,
-                "CDI-CUSTOM": cdiCustom,
+                "ilum-custom-mean" : ilum_custom_mean,
+                "CDI-custom": cdiCustom,
                 "custom-sCDI-0lx": custom_sCDI_0lx,
                 "custom-sCDI-50lx": custom_sCDI_50lx,
                 "custom-sCDI-100lx": custom_sCDI_100lx,
@@ -842,7 +869,8 @@ resultados = {
                 "custom-sCDI-500lx": custom_sCDI_500lx,
                 "custom-sCDI-750lx": custom_sCDI_750lx,
                 "custom-sCDI-1000lx": custom_sCDI_1000lx,
-                "custom-sCDI-2000lx": custom_sCDI_2000lx,                           
+                "custom-sCDI-2000lx": custom_sCDI_2000lx,
+                "ilum-mean" : ilum_anual_mean,                          
                 "CDI": cdi12hs,
                 "sCDI-0lx": sCDI_0lx,
                 "sCDI-50lx": sCDI_50lx,
@@ -867,8 +895,12 @@ create_file(parameters["CSV_SAVE_PATH"], dfUnificados)
 ###########################
 
 fig = go.Figure()
-
-fig = go.Figure(go.Heatmap(
+figs = make_subplots(
+    rows=1, cols=3,
+    column_widths=[0.7, 0.15, 0.15],    
+    specs=[[{"type": "heatmap"}, {"type": "pie"}, {"type": "pie"}]])
+ 
+figs.add_trace(go.Heatmap(
         x=[i for i in range(1, 13)], 
         y=[i for i in range(1, 13)], 
         z=df_to_plot[df_to_plot["zones"]==zones[0]]["mct"].values.reshape((12,12)),
@@ -886,9 +918,30 @@ fig = go.Figure(go.Heatmap(
         ygap=1,
         colorbar=dict(
             tickvals = [0, 50, 100, 200, 300, 500, 750, 1000, 2000]
-        )
-        
-    ))
+        )),
+        row= 1,
+        col= 1    
+    )
+
+figs.add_trace(go.Pie(values = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI"].values[0].values()),
+       labels = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI"].values[0].keys()),
+       #domain={'x':[0.1,0.5], 'y':[0,0.5]}, 
+       hole=0.5,
+       direction='clockwise',
+       sort=False,
+       title = "sCDI Anual"),
+    row= 1,
+    col= 2)
+
+figs.add_trace(go.Pie(values = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI_custom"].values[0].values()),
+       labels = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI_custom"].values[0].keys()),
+       #domain={'x':[0.1,0.5], 'y':[0,0.5]}, 
+       hole=0.5,
+       direction='clockwise',
+       sort=False,
+       title = "sCDI Custom"),
+    row= 1,
+    col= 3)
 
 ### Create data selector for diferent Zones ###
 # create zones dropdown menu
@@ -918,9 +971,6 @@ predifined_hour_stop = int(parameters["HOUR_END"]) + 1.5 - 1
 predifined_month_start = int(parameters["MONTH_START"]) + 0.5 - 1
 predifined_month_stop = int(parameters["MONTH_END"]) + 1.5 - 1
 
-#coord = [[x_lower, x_upper], [x_lower, x_upper]] primer elemento configura el rectangulo de la izquierda el segundo elemento configura el rectangulo de la derecha
-#coord = [[1, 4], [7, 13]]
-
 coord = [[1, 1], [13, 13],[1, 1], [13, 13]]
 ply_shapes = {}
 opacity_value = 0.8
@@ -949,7 +999,7 @@ if (month_start > month_end):
                         'shapes[2].visible': False,
                         'shapes[3].visible': False,                
                         }], 
-                label= 'No Filter', 
+                label= 'Anual', 
                 method='relayout'
                 ),
             
@@ -983,7 +1033,7 @@ if (month_start > month_end):
                         'shapes[2].visible': False,
                         'shapes[3].visible': False,                
                         }], 
-                label= 'No Filter', 
+                label= 'Anual', 
                 method='relayout'
                 ),
             
@@ -1018,7 +1068,7 @@ else:
                         'shapes[2].visible': False,
                         'shapes[3].visible': False,                
                         }], 
-                label= 'No Filter', 
+                label= 'Anual', 
                 method='relayout'
                 ),
             
@@ -1052,7 +1102,7 @@ else:
                         'shapes[2].visible': False,
                         'shapes[3].visible': False,                
                         }], 
-                label= 'No Filter', 
+                label= 'Anual', 
                 method='relayout'
                 ),
             
@@ -1084,62 +1134,22 @@ else:
                 label= 'Predifined', 
                 method='relayout'
                 )]
-    
-
-
-'''buttons_shapes = [
-    dict(args=[{'shapes[0].visible': False,
-                'shapes[1].visible': False,                
-                }], 
-         label= 'No Filter', 
-         method='relayout'
-         ),
-    
-    dict(args=[{'shapes[0].visible': True,
-                'shapes[1].visible': True,
-                'shapes[0].x0': predifined_hour_stop, 
-                'shapes[0].x1': 12.5,
-                'shapes[1].x0': 0.5,
-                'shapes[1].x1': predifined_hour_start
-                }], 
-         label= 'Predifined', 
-         method='relayout'
-         ),
-
-    dict(args=[{'shapes[0].visible': True,
-                'shapes[1].visible': False,
-                'shapes[0].x0': 6.5, 
-                'shapes[0].x1': 12.5
-                }], 
-         label= 'Morning', 
-         method='relayout'
-         ),
-
-    dict(args=[{'shapes[0].visible': False,
-                'shapes[1].visible': True,
-                'shapes[1].x0': 0.5,
-                'shapes[1].x1': 6.5,
-                }], 
-         label= 'Afternoon', 
-         method='relayout'
-         )    
-]'''
 
 lst_shapes=list(ply_shapes.values())
-fig.update_layout(shapes=lst_shapes)
+figs.update_layout(shapes=lst_shapes)
 
 button_layer_metrics_height = -0.15
 button_layer_zones_height = -0.1
 button_layer_filter_height = -0.2
 
-fig.update_layout(
+figs.update_layout(
     autosize=False,
     width=1500,
     height=650,
     margin = dict (t = 0, b = 0.5, l = 0, r = 0))
 
 
-fig.update_layout(
+figs.update_layout(
     updatemenus=[go.layout.Updatemenu(buttons=buttons_zones,
                                         type = "dropdown",
                                         direction="up",
@@ -1162,7 +1172,7 @@ fig.update_layout(
                                         bgcolor="#dadada")]
 )
 
-fig.update_layout(
+figs.update_layout(
     annotations=[
         dict(text="Zones", 
             x=0, xref="paper", 
@@ -1177,59 +1187,7 @@ fig.update_layout(
             showarrow=False)
     ])
 
-'''fig.update_layout(
-    updatemenus=[go.layout.Updatemenu(buttons=buttons_metrics,
-                                        type = "dropdown",
-                                        direction="right",
-                                        pad={"b": 10, "r": 10},
-                                        showactive=True,
-                                        x=0.04,
-                                        xanchor="left",
-                                        y=button_layer_metrics_height,
-                                        yanchor="bottom"),
-                go.layout.Updatemenu(buttons=buttons_zones,
-                                        type = "dropdown",
-                                        direction="right",
-                                        pad={"b": 10, "r": 10},
-                                        showactive=True,
-                                        x=0.04,
-                                        xanchor="left",
-                                        y=button_layer_zones_height,
-                                        yanchor="bottom"),
-                go.layout.Updatemenu(buttons=buttons_shapes,
-                                        type = "buttons",
-                                        direction="right",
-                                        pad={"b": 20, "r": 10},
-                                        showactive=True,
-                                        x=0.04,
-                                        xanchor="left",
-                                        y=button_layer_filter_height,
-                                        yanchor="bottom")]
-)
-
-fig.update_layout(
-    annotations=[
-        dict(text="Metrics", 
-            x=0, xref="paper", 
-            y=button_layer_metrics_height+0.04, 
-            yref="paper",
-            align="left", 
-            showarrow=False),
-        dict(text="Zones", 
-            x=0, xref="paper", 
-            y=button_layer_zones_height+0.04, 
-            yref="paper",
-            align="left", 
-            showarrow=False),
-        dict(text="Filter", 
-            x=0, xref="paper", 
-            y=button_layer_filter_height+0.05,
-            yref="paper", 
-            showarrow=False)
-    ])'''
-
-
-fig.update_yaxes(
+figs.update_yaxes(
     autorange="reversed",
     tickvals=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,12],
     ticktext=['Jan. ', 'Feb. ', 'March ', 'April ', 'May ', 'June ',
@@ -1243,7 +1201,7 @@ fig.update_yaxes(
     title='MONTHS',
     )
 
-fig.update_xaxes(
+figs.update_xaxes(
     side='top',
     nticks=12,
     tickvals= [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,12], #[i for i in range(0, 12)],
@@ -1261,5 +1219,5 @@ fig.update_xaxes(
     type="linear"                
     )
 
-fig.show()
+figs.show()
 
