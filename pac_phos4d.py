@@ -27,6 +27,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
 import configparser
+import json
 
 # RUTA DE ARCHIVOS A PROCESAR
 
@@ -838,13 +839,28 @@ for indice in zones:
     dicc_custom = {key: value for key, value in sCDI_custom.items() if value > 0.00}
     print(f"LOS VALORES DE dicc SON {dicc}")
     print(f"LOS VALORES DE dicc_custom SON {dicc_custom}")
-    
 
-    sCDI_to_plot = pd.DataFrame.append(sCDI_to_plot, {'zones': indice, 'sCDI': dicc, 'sCDI_custom': dicc_custom}, ignore_index=True)
+    print(f"DICCIONARIO CON VALORES sCDI SON: \n {dicc}")
+    print(f"DICCIONARIO CON VALORES sCDI_custom SON: \n {dicc_custom}")
+
+    
+    new_row_data = {'zones': indice, 'sCDI': [dicc], 'sCDI_custom': [dicc_custom]}
+    new_row = pd.DataFrame(new_row_data)
+   
+
+    
+    print(f"VALORES new_raw SON: \n {new_row_data}")
+    print(f"VALORES new_raw SON: \n {new_row}")
+
+    #sCDI_to_plot = sCDI_to_plot.append({'zones': indice, 'sCDI': dicc, 'sCDI_custom': dicc_custom}, ignore_index=True)
+    #sCDI_to_plot = pd.concat([sCDI_to_plot, {'zones': indice, 'sCDI': dicc, 'sCDI_custom': dicc_custom}], ignore_index=True)
+    sCDI_to_plot = pd.concat([sCDI_to_plot, new_row], ignore_index=True)
 
 
 print("LOS VALORES DE sCDI A PLOTEAR SON")
+#df_sCDI_aux = df_hours[((df_hours["month"].values >= (month_start-1))&(df_hours["month"].values <= (month_end-1)))]
 print(sCDI_to_plot)
+
 
 print(" sCDI CUSTOM VALUES ARE:")
 print (indexID)
@@ -923,8 +939,10 @@ figs.add_trace(go.Heatmap(
         col= 1    
     )
 
-figs.add_trace(go.Pie(values = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI"].values[0].values()),
-       labels = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI"].values[0].keys()),
+print(f"los datos para el grafico PIE son \n {sCDI_to_plot}")
+
+figs.add_trace(go.Pie(values = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI"].values),
+       labels = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI"].keys),
        #domain={'x':[0.1,0.5], 'y':[0,0.5]}, 
        hole=0.5,
        direction='clockwise',
