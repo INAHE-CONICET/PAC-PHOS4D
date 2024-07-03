@@ -896,26 +896,36 @@ print (dfUnificados)
        
 create_file(parameters["CSV_SAVE_PATH"], dfUnificados)
 
+
+
+
 ###########################
-### GRAPHICS SECTIONS   ###
+### GRAPHICS SECTION    ###
 ###########################
 
 fig = go.Figure()
 figs = make_subplots(
+    rows=2, cols=2,
+    column_widths=[0.7, 0.3], 
+    row_heights=[0.5, 0.5], 
+    specs=[[{"type": "heatmap", "rowspan": 2}, {"type": "pie"}],
+           [None, {"type": "pie"}]])
+
+
+
+'''figs = make_subplots(
     rows=1, cols=3,
     column_widths=[0.7, 0.15, 0.15],    
-    specs=[[{"type": "heatmap"}, {"type": "pie"}, {"type": "pie"}]])
+    specs=[[{"type": "heatmap"}, {"type": "pie"}, {"type": "pie"}]])'''
 
-
-print(f"los datos para el grafico PIE son \n {sCDI_to_plot}")
-print("los datos para el grafico PIE son \n")
-
-
+colorbar_setup = dict(
+                tickvals = [0, 50, 100, 200, 300, 500, 750, 1000, 2000],
+                len = 1,
+                tickfont = dict(size = 12),
+                x = 0.65
+            )
 
 for z in range(len(zones)):
-    print(f"valor del indice z es {z}")
-    print(f"el valor del contenido de zones para el indice {z} es: {zones[z]}")
-
     figs.add_trace(go.Heatmap(
             x=[i for i in range(1, 13)], 
             y=[i for i in range(1, 13)], 
@@ -924,17 +934,16 @@ for z in range(len(zones)):
             zmax=2000,
             text=df_to_plot[df_to_plot["zones"]==zones[z]]["mct"].values.reshape((12,12)),
             texttemplate="%{text:.2f}",
-            name=zones[0],
+            name=zones[z],
             colorscale='jet',
+            #coloraxis="coloraxis",
             hovertemplate =
                     '<b>Month</b>: %{y}<br>'+
                     '<b>Hour</b>: %{x}<br>'+
                     '<b>Ilum[lux]</b>:<b>%{z:.2f}</b>',
             xgap=1, 
             ygap=1,
-            colorbar=dict(
-                tickvals = [0, 50, 100, 200, 300, 500, 750, 1000, 2000]
-            ),
+            colorbar=colorbar_setup,
             visible=(z==0)),
             row= 1,
             col= 1    
@@ -949,21 +958,21 @@ for z in range(len(zones)):
             zmax=2000,
             text=df_to_plot[df_to_plot["zones"]==zones[z]]["cdi"].values.reshape((12,12)),
             texttemplate="%{text:.2f}",
-            name=zones[0],
+            name=zones[z],
             colorscale='jet',
+            #coloraxis="coloraxis",
             hovertemplate =
                     '<b>Month</b>: %{y}<br>'+
                     '<b>Hour</b>: %{x}<br>'+
                     '<b>Ilum[lux]</b>:<b>%{z:.2f}</b>',
             xgap=1, 
             ygap=1,
-            colorbar=dict(
-                tickvals = [0, 50, 100, 200, 300, 500, 750, 1000, 2000]
-            ),
+            colorbar=colorbar_setup,
             visible=False),
             row= 1,
             col= 1    
         )
+
 
 for z in range(len(zones)):
     figs.add_trace(go.Pie(
@@ -974,7 +983,7 @@ for z in range(len(zones)):
         direction='clockwise',
         sort=False,
         title = "sCDI Anual",
-        showlegend=False,
+        showlegend=True,
         visible=(z==0)),
         row= 1,
         col= 2)
@@ -986,87 +995,13 @@ for z in range(len(zones)):
         #domain={'x':[0.1,0.5], 'y':[0,0.5]}, 
         hole=0.5,
         direction='clockwise',
-        sort=False,
+        sort=True,
         title = "sCDI Custom",
         showlegend=False,
         visible=(z==0)),
-        row= 1,
-        col= 3)
+        row= 2,
+        col= 2)
 
-
-'''
-figs.add_trace(go.Heatmap(
-        x=[i for i in range(1, 13)], 
-        y=[i for i in range(1, 13)], 
-        z=df_to_plot[df_to_plot["zones"]==zones[0]]["mct"].values.reshape((12,12)),
-        zmin=0,
-        zmax=2000,
-        text=df_to_plot[df_to_plot["zones"]==zones[0]]["mct"].values.reshape((12,12)),
-        texttemplate="%{text:.2f}",
-        name=zones[0],
-        colorscale='jet',
-        hovertemplate =
-                '<b>Month</b>: %{y}<br>'+
-                '<b>Hour</b>: %{x}<br>'+
-                '<b>Ilum[lux]</b>:<b>%{z:.2f}</b>',
-        xgap=1, 
-        ygap=1,
-        colorbar=dict(
-            tickvals = [0, 50, 100, 200, 300, 500, 750, 1000, 2000]
-        )),
-        row= 1,
-        col= 1    
-    )
-
-print(f"los datos para el grafico PIE son \n {sCDI_to_plot}")
-print("los datos para el grafico PIE son \n")
-
-figs.add_trace(go.Pie(values = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI"][0].values()),
-       labels = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI"][0].keys()),
-       #domain={'x':[0.1,0.5], 'y':[0,0.5]}, 
-       hole=0.5,
-       direction='clockwise',
-       sort=False,
-       title = "sCDI Anual"),
-    row= 1,
-    col= 2)
-
-figs.add_trace(go.Pie(values = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI_custom"][0].values()),
-       labels = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[0]]["sCDI_custom"][0].keys()),
-       #domain={'x':[0.1,0.5], 'y':[0,0.5]}, 
-       hole=0.5,
-       direction='clockwise',
-       sort=False,
-       title = "sCDI Custom"),
-    row= 1,
-    col= 3)
-
-### Create data selector for diferent Zones ###
-# create zones dropdown menu 
-buttons_zones = []
-for z in range(0,len(zones)):
-    buttons_zones.append(
-        dict(
-            args=[{"z":[(df_to_plot[df_to_plot["zones"]==zones[z]]["mct"].values.reshape((12,12)))],
-                   "text":[(df_to_plot[df_to_plot["zones"]==zones[z]]["mct"].values.reshape((12,12)))],
-                   "name":[zones[z]]
-                   },
-                   {'row': 1, 'col': 1}],
-            label = zones[z]+" mct metric",
-            method = "restyle")
-     )
-    buttons_zones.append(
-        dict(
-            args=[{"z":[(df_to_plot[df_to_plot["zones"]==zones[z]]["cdi"].values.reshape((12,12)))],
-                   "text":[(df_to_plot[df_to_plot["zones"]==zones[z]]["cdi"].values.reshape((12,12)))],
-                   "name":[zones[z]]
-                   },
-                   {'row': 1, 'col': 1}],
-            label = zones[z]+" CDI metric",
-            method = "restyle")
-     ) 
-
-'''
 
 ## HEATMAP MASK FOR CUSTOM MONTH AND HOURS SELECTED
 predifined_hour_start = int(parameters["HOUR_START"]) + 0.5 - 1
@@ -1077,11 +1012,7 @@ coord = [[1, 1], [13, 13],[1, 1], [13, 13]]
 ply_shapes = {}
 opacity_value = 0.8
 for i in range(0,4):
-    ply_shapes['shape_'+str(i)] = go.layout.Shape(type="rect",
-                                                  #x0=coord[i][0] - 0.5,
-                                                  #x1=coord[i][1] - 0.5,
-                                                  #y0=coord[i][0] - 0.5,
-                                                  #y1=coord[i][0] - 0.5,
+    ply_shapes['shape_'+str(i)] = go.layout.Shape(type="rect",                                                  
                                                   x0= 0.5,
                                                   x1= 0.5,
                                                   y0= 0.5,
@@ -1241,14 +1172,14 @@ lst_shapes=list(ply_shapes.values())
 figs.update_layout(shapes=lst_shapes)
 
 button_layer_metrics_height = -0.15
-button_layer_zones_height = -0.1
-button_layer_filter_height = -0.2
+button_layer_zones_height = -0.15
+button_layer_filter_height = -0.3
 
 figs.update_layout(
     autosize=False,
     width=1500,
     height=650,
-    margin = dict (t = 0, b = 0.5, l = 0, r = 0))
+    margin = dict (t = 0.1, b = 0.5, l = 0, r = 0))
 
 ##
 ##
@@ -1281,7 +1212,15 @@ for i in range(0,len(zones)):
 
     buttons_plots.append(button_cdi)
 
-print(buttons_plots)
+
+legend_setup = dict(
+    x = 1,
+    y = 0.5,
+    orientation = "v",
+    yanchor = "middle",
+    xanchor = "center"
+)
+
 figs.update_layout(
     updatemenus=[go.layout.Updatemenu(buttons=buttons_plots,
                                         type = "dropdown",
@@ -1302,32 +1241,10 @@ figs.update_layout(
                                         xanchor="left",
                                         y=button_layer_filter_height,
                                         yanchor="bottom",
-                                        bgcolor="#dadada")]
+                                        bgcolor="#dadada")],
+    legend1=legend_setup,
+    legend2=legend_setup
 )
-
-'''
-figs.update_layout(
-    updatemenus=[go.layout.Updatemenu(buttons=buttons_zones,
-                                        type = "dropdown",
-                                        direction="up",
-                                        pad={"b": 10, "r": 10},
-                                        showactive=True,
-                                        x=0.04,
-                                        xanchor="left",
-                                        y=button_layer_zones_height,
-                                        yanchor="bottom",
-                                        bgcolor="#dadada"),
-                go.layout.Updatemenu(buttons=buttons_shapes,
-                                        type = "buttons",
-                                        direction="right",
-                                        pad={"b": 20, "r": 10},
-                                        showactive=True,
-                                        x=0.04,
-                                        xanchor="left",
-                                        y=button_layer_filter_height,
-                                        yanchor="bottom",
-                                        bgcolor="#dadada")]
-)'''
 
 figs.update_layout(
     annotations=[
@@ -1339,7 +1256,7 @@ figs.update_layout(
             showarrow=False),
         dict(text="Filter", 
             x=0, xref="paper", 
-            y=button_layer_filter_height+0.05,
+            y=button_layer_filter_height+0.06,
             yref="paper", 
             showarrow=False)
     ])
