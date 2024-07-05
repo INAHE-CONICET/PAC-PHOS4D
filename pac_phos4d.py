@@ -43,7 +43,7 @@ month_start = 0
 month_end = 0
 cdiSensorFraction = 0.0
 
-# CDI  - Characteristic Daylight Illuminance and sCDI
+# CDI  - Characteristic Daylight Iluminance and sCDI
 '''
 Esta métrica proporciona una interpretación inversa al DA. Ésta
 no representa un porcentaje de tiempo correspondiente a una iluminancia objetivo (por ejemplo,
@@ -56,11 +56,7 @@ cdiSetpoint = 300
 
 #Return hours as Ints
 def get_hour_from_header_int(cabecera):
-    #parametros = list(cabecera)
     parametros = cabecera.split()
-    #print(f"La lista de parametros es: {parametros}\n")
-    #print(f"La hora es {parametros[7]}")
-    #return parametros[7]
     if parametros[2]=="1)":
         return 0
     elif parametros[2]=="2)":
@@ -90,9 +86,7 @@ def get_hour_from_header_int(cabecera):
         #return "NONE"
 
 #Return month as Ints
-def get_month_from_header_int(cabecera):
-    #parametros = list(cabecera)   
-    #return parametros[1]
+def get_month_from_header_int(cabecera):    
     parametros = cabecera.split()
     if parametros[0]=="(1,":
         return 0
@@ -136,11 +130,7 @@ def get_month_from_header_int(cabecera):
 
 # Return legend with months and hours as Strings
 def get_hour_from_header(cabecera):
-    #parametros = list(cabecera)
     parametros = cabecera.split()
-    #print(f"La lista de parametros es: {parametros}\n")
-    #print(f"La hora es {parametros[7]}")
-    #return parametros[7]
     if parametros[2]=="1)":
         return '0'
     elif parametros[2]=="2)":
@@ -170,8 +160,6 @@ def get_hour_from_header(cabecera):
         #return "NONE"
 
 def get_month_from_header(cabecera):
-    #parametros = list(cabecera)   
-    #return parametros[1]
     parametros = cabecera.split()
     if parametros[0]=="(1,":
         return "January"
@@ -218,20 +206,6 @@ def get_cdi_index_pho4d(dfDatas):
     - CDI parameter calc
     Escala de valores de iluminancia: 0lx, 50lx, 100lx, 200lx, 300lx, 500lx, 750lx, 1000lx, 2000lx
 
-    1 - Del dataset filtrar por zona 
-    2 - Tomar los valores por hora y contar las veces que ocurre la condición según la escala de iluminancia predefinida ("Threshold" en planilla excel)
-    3 - El valor calculado en el punto 2 se debe *100 y dividir por la cantidad de puntos de la zona analizada para cada hora por cada valor de la 
-    escala de iluminancia ("Threshold%" en planilla excel)
-    4 - Si el valor calculado de Threshold% es igual o mayor a 50% (del tiempo?) (valor configurable?) se indica el valor de iluminancia de la escala 
-    de iluminancia predefinida correspondiente, en caso contrario se indica como NaN ("CDI_sensor" en planilla excel)
-    5 - El valor de CDI para cada hora es el mayor valor de iluminancia predefinida que supera el 50% (del tiempo?) calculado en el punto 4
-    6 - Contabilizar la cantidad de horas que superan el setPointCDI (300 en el excel) y calcular el porcentaje sobre la totalidad de las horas
-
-    
-    nHours - number of columns of dataset that represents the hours
-    nSensors - number of rows of dataset that represent the number of sensor in the space under study
-
-
     Input Parameters
         dfDatas -  Pandas Dataframe with data 
     
@@ -244,7 +218,6 @@ def get_cdi_index_pho4d(dfDatas):
     nSensors = len(dfDatas.index)
 
     print("---------------------------------")
-    #print(f"ZONE: {dfDatas["# zone"]}")
     print(f"HOURS: {nHours} ")
     print(f"NUMBER OF SENSORS: {nSensors} ")
     print("---------------------------------")
@@ -274,21 +247,16 @@ def get_cdi_index_pho4d(dfDatas):
     # DETERMIANR LA CANTIDAD DE SENSORES CORRESPONDIENTE AL PORCETAJE SELECCIONADO
     cdiSensorsPercent = 100 * float(parameters["CDI_SENSOR_FRACTION"])
 
-    print(f"\nCDI - Porcentaje de sensores considerados: {cdiSensorsPercent:.2f} %\n")
+    print(f"\nCDI - Sensors percent: {cdiSensorsPercent:.2f} %\n")
          
     dfDatasValues = pd.DataFrame()
 
     dfDatasValues = dfDatas.iloc[:, 5:len(list(dfDatas.columns))].copy()
-    #print(f"LOS DATOS A PROCESAR SON \n {dfDatasValues}") 
 
     dfCDIVector = dfDatas[[dfDatas.columns[5]]].copy() # permite generar un array con la misma cantida de filas que el dataFrame que recibimos
-    dfCDIVector[:] = 0  
-
-    #print(f"LOS DATOS A PROCESAR SON \n {dfDatasValues}") 
-    #print(f"LA CANTIDAD DE COLUMNAS SON \n {dfCDIVector.shape}")
+    dfCDIVector[:] = 0
 
     dfDatasValues.columns = [i for i in range(dfDatasValues.shape[1])]
-    #print(f"LOS NOMBRES DE LAS COLUMNAS SON: {dfDatasValues.columns}")
 
     for hs in range(dfDatasValues.shape[1]):        
         try:            
@@ -383,6 +351,7 @@ def read_config_file(config_file_path):
     config = configparser.ConfigParser(converters={'list': lambda x: [i.strip() for i in x.split(',')]})
     config.read(config_file_path)
 
+    # Default values
     configValues = {
         "DATA_FILE_PATH": "",
         "CSV_SAVE_PATH": "",
@@ -393,17 +362,7 @@ def read_config_file(config_file_path):
         "CDI_SENSOR_FRACTION": "0.5"
     }
 
-    '''filesPathData = config['PATHS']['data_file_path']
-    filesPathSaveCSV = config['PATHS']['csv_save_path']
-    
-    hour_start = config['FILTER']['hour_start']
-    hour_end = config['FILTER']['hour_end']
-    #month_start = config['FILTER']['month_start']
-    #month_end = config['FILTER']['month_end']
-
-    cdiSensorFraction = config['PARAMETERS']['cdiSensorFraction']
-    #cdiSetpoint = config['PARAMETERS']['cdiSetpoint']'''
-
+    # Set values from setup.cfg
     configValues = {
         "DATA_FILE_PATH": config['PATHS']['data_file_path'],
         "CSV_SAVE_PATH": config['PATHS']['csv_save_path'],
@@ -414,40 +373,28 @@ def read_config_file(config_file_path):
         "CDI_SENSOR_FRACTION": config['PARAMETERS']['cdiSensorFraction']
     }      
 
-    print(f"Los valores de configuracion son \n {configValues}")
+    print(f"Configuration Values\n {configValues}")
     return configValues
 
 def create_file(filesPath, dfData):
     '''
-    - GENERACIÓN DE ARCHIVOS CON LOS DATOS UNIFICADOS
+    - FILE CREATION
         Se genera el archivo "unificado" con los datos calculados, en el directorio indicado.
     
-    Parámetros Input
+    nput
         filesPath - Elemento tipo String, indica la ruta a la carpeto donde se guardará el archivo
         dfData - Elemento tipo Panda dataframe, contiene la información a guardar en el archivo
         
-    Parámetros Output
+    Output
         archivo unificado generado en el filePath indicado
 
     '''
-    print(dfData)
 
     if os.path.isdir(filesPath):
-        #print("La carpeta existe")
         path = filesPath
     else:
         os.mkdir(filesPath)
         path = filesPath
-        #print(f"Se creo la carpeta results la ruta es {path}")
-
-    '''creationSuccess = dfData.to_csv(path+'results_ph4dt.csv', index = False ,mode='a')
-
-    if creationSuccess != None:
-        print("Creation of file OK")
-        return 1
-    else:
-        print("Problem with creation of file")
-        return 0'''
     
     try:
         dfData.to_csv(path+'results_pac.csv', index = False ,mode='a')
@@ -457,6 +404,15 @@ def create_file(filesPath, dfData):
         print("Problem with creation of file")
 
 def get_sCDI (dfData):
+    '''
+    - COMPUTE sCDI VALUES FROM DATAFRAME
+
+    Input: pandas dataframe
+
+    Output: dictionary with sCDI values
+        { 2000lx: nn, 1000lx: nn, 750lx: nn, 500lx: nn, 300lx: nn, 200lx: nn, 100lx: nn, 50lx: nn, 0lx: nn }
+
+    '''
 
     normalizeValues = {}
 
@@ -536,7 +492,6 @@ def get_cdi_from_sCDI(sCDI):
 
     cdi = "0lx"
     p = 0.0
-    print(sCDI)
 
     for k in sCDI:
         p = sCDI[k] + p
@@ -565,7 +520,7 @@ def get_cdi_from_sCDI(sCDI):
     elif cdi == '2000lx':
         cdiValue = 2000    
     
-    print(f"El valor de CDI es {cdiValue}")
+    print(f"CDI value is:\n {cdiValue}")
 
     return cdiValue
 
@@ -590,7 +545,7 @@ try:
     print("Data file OK")
 
 except:
-    print("Error on Data file")
+    print("Data file Error")
     exit(0)
 
 
@@ -600,8 +555,7 @@ month_start = int(parameters["MONTH_START"])
 month_end = int(parameters["MONTH_END"])
 
 
-
-    #verify the hours range is correct and ( hour_start < hour_end))
+#verify hours range is correct and (hour_start < hour_end)
 if ((1 <= hour_start <= 12) and (1 <= hour_end <= 12)):
         print("Values of Start and End Hour are valid")
 else:
@@ -616,10 +570,7 @@ else:
     print("The values of Start or End Month are incorrect, please verify \n Months must have a value between 1 and 12")
     exit(0)
 
-
 headers = list(dfDatas.columns)
-#print(f"Headers of dataframe:\n{headers}")
-
 hoursQuantity = len(headers)-5
 
 print(f"Hours to proccess: {hoursQuantity}")
@@ -634,11 +585,6 @@ tablaDatos = dict()
 print(dfDatas["# zone"].unique().tolist())
 
 cdiMatrix = pd.DataFrame()
-#cdiMatrix = pd.DataFrame(columns=["# zone", "cdi"])
-df_cdi = pd.DataFrame(columns = ['zones', 'cdi'], index=[0]) ### NOT USED - review his use
-
-#df_mct_ = pd.DataFrame(columns=['zones', 'month', 'mct'], index=[0])
-#df_aux = pd.DataFrame(columns=['opacity'], index=[0])
 df_mct = {}
 df_aux2 = []
 cdi_data = {}
@@ -648,7 +594,6 @@ for zone in zones:
     df_mct[zone] = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct'])#, index=[0])
     cdi_data[zone] = pd.DataFrame(columns=['cdi'])#, index=[0])
     df_global[zone] = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct', 'cdi'])#, index=[0])
-
 
 # The function get_cdi_pho4d() should return a pandas dataframe with zone and cdi columns
 for zone in dfDatas["# zone"].unique().tolist():
@@ -661,22 +606,13 @@ print(f"Los datos de CDI son: \n{cdi_data}")
 
 for indice in zones:
     tablaDatos[indice] = np.zeros((12,12))
-
-    print(indice)
-    #tablaDatos[indice] = pd.DataFrame(columnas)
    
-#print(tablaDatos)
 print(f'The size of DataTable is >> {getsizeof(tablaDatos)}')
-
-#df_mct = pd.DataFrame({'zones':[], 'month':[], 'hour':[], 'mct':[]})
-#df_mct = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct'], index=[0])
-#df_mct = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct'], index=[0])
-#print(f"LOS DATOS DE df_mct SON \n {df_mct}")
 
 #Create dataFrame with mct values for each 'Zone'
 for element in range (5,len(headers)):
     mct_values = dfDatas.groupby("# zone")[headers[element]].median()
-    #print(f"LOS VALORES MEDIOS SON \n {mct_values}")
+    
     hour = get_hour_from_header(headers[element])
     month = get_month_from_header(headers[element])
 
@@ -685,15 +621,9 @@ for element in range (5,len(headers)):
     
     for indice in mct_values.index:        
         df_mct[indice] = pd.concat([df_mct[indice], pd.DataFrame({'zones': [indice], 'month':[month_int], 'hour': [hour_int], 'mct': [mct_values[indice]]})], ignore_index=True, axis=0)
-        
-        #df_aux2[indice] = pd.DataFrame({'zones': [indice], 'month':[month], 'hour': [hour], 'mct': [mct_values[indice]]})
-        #df_aux2[indice] = pd.concat([df_aux2[indice], pd.DataFrame({'zones': [indice], 'month':[month], 'hour': [hour], 'mct': [mct_values[indice]]})], ignore_index=True, axis=0)
-        #df_mct = pd.concat([df_mct, df[indice]], ignore_index=True, axis=0)
-        #tablaDatos[indice][int(mes)][int(hora)] = mct_values[indice]
 
 
 ### JOIN THE VALUES OF CDI TO df_mct DATAFRAME
-#df_to_plot = pd.DataFrame(columns=['zones', 'month', 'hour', 'mct', 'cdi'], index=[0])
 for zone in zones:
     df_global[zone] = pd.concat([df_mct[zone], cdi_data[zone]], axis=1)
 
@@ -705,7 +635,7 @@ for zone in zones:
 xLabs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
 yLabs = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
-print(":::::::::    LOS DATOS A GUARDAR SON :::::::::")
+print(":::::::::    DATA TO BE STORAGED :::::::::")
 print(df_to_plot)
 
 indexID = []
@@ -749,18 +679,14 @@ for indice in zones:
 
     print(df_global[indice])
     sCDI_values = get_sCDI(df_global[indice])   
-    
-    #print(df_sCDI_aux)
 
-    print(f"::::::::::::::::::::::::::::::::::::::::::::::::")
-    print(f"::::::::    FILTRADO POR HORA DE DATOS  ::::::::")
-    print(f"::::::::::::::::::::::::::::::::::::::::::::::::")
     df_hs_aux = df_global[indice]
 
+    # Filter data applying selected hour range
     if (hour_start > hour_end):        
-        df_hs_lower = df_hs_aux[(df_hs_aux["hour"].values <= (hour_end-1))]
-        df_hs_upper = df_hs_aux[(df_hs_aux["hour"].values >= (hour_start-1))]
-        framesHS = [df_hs_lower, df_hs_upper]            
+        df_hs_bottom = df_hs_aux[(df_hs_aux["hour"].values <= (hour_end-1))]
+        df_hs_top = df_hs_aux[(df_hs_aux["hour"].values >= (hour_start-1))]
+        framesHS = [df_hs_bottom, df_hs_top]            
         df_hours = pd.concat(framesHS)
 
     elif(hour_start < hour_end):
@@ -769,12 +695,7 @@ for indice in zones:
     else:
         df_hours = df_hs_aux[(df_hs_aux["hour"].values == (hour_start-1))]
     
-    print(df_hours)
-
-    print(f"::::::::::::::::::::::::::::::::::::::::::::::::")
-    print(f"::::::::::::::::::::::::::::::::::::::::::::::::")
-
-
+    # Filter data applying selected month range
     if (month_start < month_end):
         df_sCDI_aux = df_hours[((df_hours["month"].values >= (month_start-1))&(df_hours["month"].values <= (month_end-1)))]
         
@@ -787,16 +708,18 @@ for indice in zones:
     else:
         df_sCDI_aux = df_hours[df_hours["month"].values == (month_start-1)]
             
-        
+    
     print(df_sCDI_aux)
 
     sCDI_custom = get_sCDI(df_sCDI_aux)
 
-    print(f"Los valores de sCDI son >> \n {sCDI_values}")
-    print(f"Los valores de sCDI - custom son >> \n {sCDI_custom}")
+    print(f"::: sCDI values are >> \n {sCDI_values}")
+    print(f"::: sCDI - custom values are >> \n {sCDI_custom}")
 
     cdi12hsIndex = get_cdi_from_sCDI(sCDI_values)
     cdiCustomIndex = get_cdi_from_sCDI(sCDI_custom)
+
+    ### Data structure to be stored in datafile
     
     indexID.append(indice)
 
@@ -804,7 +727,6 @@ for indice in zones:
     hour_start_stop.append(str(hour_start) + " - " + str(hour_end))
     cdiFract.append(parameters["CDI_SENSOR_FRACTION"])            
     CDIes.append(cdiSetpoint)
-
     
     cdiCustom.append(cdiCustomIndex)
     custom_sCDI_0lx.append(sCDI_custom['0lx'])
@@ -828,12 +750,8 @@ for indice in zones:
     sCDI_1000lx.append(sCDI_values['1000lx'])
     sCDI_2000lx.append(sCDI_values['2000lx'])
 
-
     ilum_anual_mean.append(df_hs_aux["mct"].mean())
     ilum_custom_mean.append(df_sCDI_aux["mct"].mean())
-
-    print(ilum_anual_mean)
-    print(ilum_custom_mean)
 
     dicc = {key: value for key, value in sCDI_values.items() if value > 0.00}
     dicc_custom = {key: value for key, value in sCDI_custom.items() if value > 0.00}
@@ -847,18 +765,12 @@ for indice in zones:
     sCDI_to_plot = pd.concat([sCDI_to_plot, new_row], ignore_index=True)
 
 
-print("LOS VALORES DE sCDI A PLOTEAR SON")
-#df_sCDI_aux = df_hours[((df_hours["month"].values >= (month_start-1))&(df_hours["month"].values <= (month_end-1)))]
-print(sCDI_to_plot)
-
 
 print(" sCDI CUSTOM VALUES ARE:")
 print (indexID)
 print (month_start_stop)
 print(hour_start_stop)
 print (sCDI_custom)
-
-
 
 resultados = {
                 "zone" : indexID, 
@@ -889,14 +801,9 @@ resultados = {
                 "sCDI-2000lx": sCDI_2000lx                
             }
 
-print(resultados)
-
 dfUnificados = pd.DataFrame(resultados)
 print (dfUnificados)
-       
 create_file(parameters["CSV_SAVE_PATH"], dfUnificados)
-
-
 
 
 ###########################
@@ -910,13 +817,6 @@ figs = make_subplots(
     row_heights=[0.5, 0.5], 
     specs=[[{"type": "heatmap", "rowspan": 2}, {"type": "pie"}],
            [None, {"type": "pie"}]])
-
-
-
-'''figs = make_subplots(
-    rows=1, cols=3,
-    column_widths=[0.7, 0.15, 0.15],    
-    specs=[[{"type": "heatmap"}, {"type": "pie"}, {"type": "pie"}]])'''
 
 colorbar_setup = dict(
                 tickvals = [0, 50, 100, 200, 300, 500, 750, 1000, 2000],
@@ -936,7 +836,6 @@ for z in range(len(zones)):
             texttemplate="%{text:.2f}",
             name=zones[z],
             colorscale='jet',
-            #coloraxis="coloraxis",
             hovertemplate =
                     '<b>Month</b>: %{y}<br>'+
                     '<b>Hour</b>: %{x}<br>'+
@@ -960,7 +859,6 @@ for z in range(len(zones)):
             texttemplate="%{text:.2f}",
             name=zones[z],
             colorscale='jet',
-            #coloraxis="coloraxis",
             hovertemplate =
                     '<b>Month</b>: %{y}<br>'+
                     '<b>Hour</b>: %{x}<br>'+
@@ -978,7 +876,6 @@ for z in range(len(zones)):
     figs.add_trace(go.Pie(
         values = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[z]]["sCDI"].iloc[0].values()),
         labels = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[z]]["sCDI"].iloc[0].keys()),
-        #domain={'x':[0.1,0.5], 'y':[0,0.5]}, 
         hole=0.5,
         direction='clockwise',
         sort=False,
@@ -992,7 +889,6 @@ for z in range(len(zones)):
     figs.add_trace(go.Pie(
         values = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[z]]["sCDI_custom"].iloc[0].values()),
         labels = list(sCDI_to_plot[sCDI_to_plot["zones"]==zones[z]]["sCDI_custom"].iloc[0].keys()),
-        #domain={'x':[0.1,0.5], 'y':[0,0.5]}, 
         hole=0.5,
         direction='clockwise',
         sort=True,
@@ -1181,11 +1077,10 @@ figs.update_layout(
     height=650,
     margin = dict (t = 0.1, b = 0.5, l = 0, r = 0))
 
+
 ##
 ##
-##
-## - MODIFICAR PARA QUE ADOPTE EL PRIMER updatemenus A LOS BOTONES GENERADOS 
-## CON EL NUEVO MÉTODO
+## MENU UPDATE
 
 buttons_plots = []
 
@@ -1212,14 +1107,12 @@ for i in range(0,len(zones)):
 
     buttons_plots.append(button_cdi)
 
-
-legend_setup = dict(
+pie_legend_setup = dict(
     x = 1,
     y = 0.5,
     orientation = "v",
     yanchor = "middle",
-    xanchor = "center"
-)
+    xanchor = "center")
 
 figs.update_layout(
     updatemenus=[go.layout.Updatemenu(buttons=buttons_plots,
@@ -1242,11 +1135,8 @@ figs.update_layout(
                                         y=button_layer_filter_height,
                                         yanchor="bottom",
                                         bgcolor="#dadada")],
-    legend1=legend_setup,
-    legend2=legend_setup
-)
-
-figs.update_layout(
+    legend1=pie_legend_setup,
+    legend2=pie_legend_setup,
     annotations=[
         dict(text="Zones", 
             x=0, xref="paper", 
@@ -1258,8 +1148,8 @@ figs.update_layout(
             x=0, xref="paper", 
             y=button_layer_filter_height+0.06,
             yref="paper", 
-            showarrow=False)
-    ])
+            showarrow=False)]
+)
 
 figs.update_yaxes(
     autorange="reversed",
