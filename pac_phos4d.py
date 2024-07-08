@@ -756,8 +756,8 @@ for indice in zones:
     dicc = {key: value for key, value in sCDI_values.items() if value > 0.00}
     dicc_custom = {key: value for key, value in sCDI_custom.items() if value > 0.00}
     
-    print(f"DICCIONARIO CON VALORES sCDI SON: \n {dicc}")
-    print(f"DICCIONARIO CON VALORES sCDI_custom SON: \n {dicc_custom}")
+    print(f"VALUES OF sCDI: \n {dicc}")
+    print(f"VALUES OF sCDI_custom: \n {dicc_custom}")
     
     new_row_data = {'zones': indice, 'sCDI': [dicc], 'sCDI_custom': [dicc_custom]}
     new_row = pd.DataFrame(new_row_data)
