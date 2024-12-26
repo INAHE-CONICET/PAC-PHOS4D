@@ -1,17 +1,17 @@
 #-*- coding: utf-8 -*-
 '''
-TEST DE LIBRERIAS kUFFLINGS Y PLOTLY
+CDI calc
 
-Autores: 
+Authors: 
     PhD. Juan Manuel Monteoliva
-    Ing. Emanuel R. Schumacher
+    Eng. Emanuel R. Schumacher
     
     
-Fecha inicio: -
+Date: 4/05/2024
 
 '''
 
-###### LIBRERÍAS ######
+###### LIBS ######
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -29,7 +29,7 @@ import plotly.express as px
 import configparser
 import json
 
-# RUTA DE ARCHIVOS A PROCESAR
+# PATHFILES
 
 filesPath = './'
 cnf_path = './setup.cfg'
@@ -44,17 +44,12 @@ month_end = 0
 cdiSensorFraction = 0.0
 
 # CDI  - Characteristic Daylight Iluminance and sCDI
-'''
-Esta métrica proporciona una interpretación inversa al DA. Ésta
-no representa un porcentaje de tiempo correspondiente a una iluminancia objetivo (por ejemplo,
-200 lux), sino una iluminancia de tarea (0lx, 50lx, 100lx, 200lx, 300lx, 500lx, 750lx, 1000lx,
-2000lx) correspondiente al porcentaje de tiempo ocupado
-'''
-cdiPorcentajeSensores = 0.5 # fraction of sensor to consider for analysis CDI
-scdiPorcentajeSensores = cdiPorcentajeSensores # fraction of sensor to consider for analysis sCDI
+
+cdiPorcentajeSensores = 0.5 # fraction of sensor to consider for CDI analysis 
+scdiPorcentajeSensores = cdiPorcentajeSensores # fraction of sensor to consider for sCDI analysis 
 cdiSetpoint = 300
 
-#Return hours as Ints
+# Return hours as Ints
 def get_hour_from_header_int(cabecera):
     parametros = cabecera.split()
     if parametros[2]=="1)":
@@ -83,50 +78,36 @@ def get_hour_from_header_int(cabecera):
         return 11
     else:
         return "Index Error"
-        #return "NONE"
 
 #Return month as Ints
 def get_month_from_header_int(cabecera):    
     parametros = cabecera.split()
     if parametros[0]=="(1,":
         return 0
-        #return "january"
     elif parametros[0]=="(2,":
         return 1
-        #return "february"
     elif parametros[0]=="(3,":
         return 2
-        #return "march"
     elif parametros[0]=="(4,":
         return 3
-        #return "april"
     elif parametros[0]=="(5,":
         return 4
-        #return "may"
     elif parametros[0]=="(6,":
         return 5
-        #return "june"
     elif parametros[0]=="(7,":
         return 6
-        #return "july"
     elif parametros[0]=="(8,":
         return 7
-        #return "august"
     elif parametros[0]=="(9,":
         return 8
-        #return "september"
     elif parametros[0]=="(10,":
         return 9
-        #return "october"
     elif parametros[0]=="(11,":
         return 10
-        #return "november"
     elif parametros[0]=="(12,":
         return 11
-        #return "december"
     else:
         return "Index Error"
-        #return "NONE"
 
 # Return legend with months and hours as Strings
 def get_hour_from_header(cabecera):
@@ -157,54 +138,40 @@ def get_hour_from_header(cabecera):
         return '11'
     else:
         return "Index Error"
-        #return "NONE"
 
 def get_month_from_header(cabecera):
     parametros = cabecera.split()
     if parametros[0]=="(1,":
         return "January"
-        #return "january"
     elif parametros[0]=="(2,":
         return "February"
-        #return "february"
     elif parametros[0]=="(3,":
-        return  "March" 
-        #return "march"
+        return  "March"
     elif parametros[0]=="(4,":
-        return "April" 
-        #return "april"
+        return "April"
     elif parametros[0]=="(5,":
-        return "May" 
-        #return "may"
+        return "May"
     elif parametros[0]=="(6,":
-        return "June" 
-        #return "june"
+        return "June"
     elif parametros[0]=="(7,":
-        return "July" 
-        #return "july"
+        return "July"
     elif parametros[0]=="(8,":
-        return "August" 
-        #return "august"
+        return "August"
     elif parametros[0]=="(9,":
-        return "September" 
-        #return "september"
+        return "September"
     elif parametros[0]=="(10,":
-        return "October" 
-        #return "october"
+        return "October"
     elif parametros[0]=="(11,":
-        return "November" 
-        #return "november"
+        return "November"
     elif parametros[0]=="(12,":
         return "December"
-        #return "december"
     else:
         return "Index Error"
-        #return "NONE"
 
 def get_cdi_index_pho4d(dfDatas):
     '''
     - CDI parameter calc
-    Escala de valores de iluminancia: 0lx, 50lx, 100lx, 200lx, 300lx, 500lx, 750lx, 1000lx, 2000lx
+    Iluminance scale: 0lx, 50lx, 100lx, 200lx, 300lx, 500lx, 750lx, 1000lx, 2000lx
 
     Input Parameters
         dfDatas -  Pandas Dataframe with data 
@@ -379,14 +346,13 @@ def read_config_file(config_file_path):
 def create_file(filesPath, dfData):
     '''
     - FILE CREATION
-        Se genera el archivo "unificado" con los datos calculados, en el directorio indicado.
     
-    nput
-        filesPath - Elemento tipo String, indica la ruta a la carpeto donde se guardará el archivo
-        dfData - Elemento tipo Panda dataframe, contiene la información a guardar en el archivo
+    Input
+        filesPath - file path to store the file generated with data
+        dfData - Panda dataframe, porvide the dato to be stored in the file
         
     Output
-        archivo unificado generado en el filePath indicado
+        .CSV file
 
     '''
 
@@ -541,7 +507,6 @@ except:
 
 try:
     dfDatas = pd.read_csv(parameters["DATA_FILE_PATH"], sep='\t', header=2)
-    #dfDatas = pd.read_csv(parameters['FILES_PATH_DATA'], sep='\t', header=2)
     print("Data file OK")
 
 except:
@@ -562,8 +527,7 @@ else:
     print("The values of Start or End Hour are incorrect, please verify \n Hours must have a value between 1 and 12 \n Star Hour must be lower than End Hour")
     exit(0)
 
-
-    #verify the month range is correct
+#verify the month range is correct
 if (1 <= month_start <= 12 and 1 <= month_end <= 12 ):
         print("Values of Start and End Month are valid")
 else:
@@ -597,17 +561,14 @@ for zone in zones:
 
 # The function get_cdi_pho4d() should return a pandas dataframe with zone and cdi columns
 for zone in dfDatas["# zone"].unique().tolist():
-    cdies = get_cdi_index_pho4d(dfDatas.loc[(dfDatas["# zone"] == zone)])    
-    print(f"Los datos de CDI son: \n{cdies}")
+    cdies = get_cdi_index_pho4d(dfDatas.loc[(dfDatas["# zone"] == zone)]) 
+    print(f"Zone {zone}")   
+    print(f"CDI values: \n{cdies}")
     for element in cdies:
         cdi_data[zone] = pd.concat([cdi_data[zone], pd.DataFrame({'cdi': [element]})], ignore_index=True, axis=0)
-        
-print(f"Los datos de CDI son: \n{cdi_data}")
 
 for indice in zones:
     tablaDatos[indice] = np.zeros((12,12))
-   
-print(f'The size of DataTable is >> {getsizeof(tablaDatos)}')
 
 #Create dataFrame with mct values for each 'Zone'
 for element in range (5,len(headers)):
@@ -621,7 +582,6 @@ for element in range (5,len(headers)):
     
     for indice in mct_values.index:        
         df_mct[indice] = pd.concat([df_mct[indice], pd.DataFrame({'zones': [indice], 'month':[month_int], 'hour': [hour_int], 'mct': [mct_values[indice]]})], ignore_index=True, axis=0)
-
 
 ### JOIN THE VALUES OF CDI TO df_mct DATAFRAME
 for zone in zones:
@@ -763,8 +723,6 @@ for indice in zones:
     new_row = pd.DataFrame(new_row_data)
 
     sCDI_to_plot = pd.concat([sCDI_to_plot, new_row], ignore_index=True)
-
-
 
 print(" sCDI CUSTOM VALUES ARE:")
 print (indexID)
