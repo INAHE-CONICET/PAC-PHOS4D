@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 '''
-TEST DE LIBRERIAS kUFFLINGS Y PLOTLY
+CDI AND sCDI CALCS
 
 Autores: 
     PhD. Juan Manuel Monteoliva
