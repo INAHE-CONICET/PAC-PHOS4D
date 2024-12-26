@@ -22,7 +22,6 @@ import glob
 import configparser
 from sys import exit
 from sys import getsizeof
-#import plotly.plotly as py
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
