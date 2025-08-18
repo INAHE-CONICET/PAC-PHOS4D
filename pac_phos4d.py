@@ -372,7 +372,7 @@ def create_file(filesPath, dfData):
         #print(f"Se creo la carpeta results la ruta es {path}")
     
     try:
-        dfData.to_csv(path+'results_pho4dt.csv', index = False ,mode='a')
+        dfData.to_csv(path+'results_pac-phos4dt.csv', index = False ,mode='a')
         print(f"Creation of file OK on {path}")
 
     except:
