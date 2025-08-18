@@ -99,7 +99,7 @@ python3 pac_phos4d.py
 A los resultados se puede acceder desde:
 
 ```
-./example/results_pho4dt.csv
+./example/results_pac-phos4dt.csv
 ```
 
 ### Autores
