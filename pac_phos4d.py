@@ -784,7 +784,8 @@ fig = go.Figure(go.Heatmap(
         xgap=1, 
         ygap=1,
         colorbar=dict(
-            tickvals = [0, 50, 100, 200, 300, 500, 750, 1000, 2000]
+            tickvals = [0, 50, 100, 200, 300, 500, 750, 1000, 2000],
+            title = "Iluminance [Lux]"
         )
         
     ))
